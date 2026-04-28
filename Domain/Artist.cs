@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,8 @@ namespace Domain
         public int? LabelId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string? CoverLink { get; set; }  // URL фото артиста (облако)
+        [Column("cover_link")]
+        public string? CoverLink { get; set; }
 
         public virtual RecordLabel? Label { get; set; }
        // public virtual ICollection<Album> Albums { get; set; } = new List<Album>();

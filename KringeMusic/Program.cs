@@ -1,7 +1,8 @@
-﻿using BusinessLogic;
+﻿using Application;
+using BusinessLogic;
+using DataLayer;
 using Domain.Interfaces;
 using Infrastructure;
-using DataLayer;
 using KringeMusic.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,16 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.Configure<LocalStorageSettings>(builder.Configuration.GetSection("LocalStorage"));
+builder.Services.AddScoped<IStorageService, LocalFileStorage>();
+builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
+builder.Services.AddScoped<IRecordLabelRepository, RecordLabelRepository>();
+builder.Services.AddScoped<ITrackRepository, TrackRepository>();
+builder.Services.AddScoped<IGenreRepository, GenreRepository>();
+builder.Services.AddScoped<GenreService>();
+builder.Services.AddScoped<TrackService>();
+builder.Services.AddScoped<ArtistService>();  
+builder.Services.AddScoped<LabelService>();
 
 // DB
 builder.Services.AddDbContext<DataLayer.AppDbContext>(options =>
@@ -42,8 +53,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 
-app.UseAuthorization(); // позже понадобится
-
+app.UseAuthorization();
+app.UseStaticFiles();
 app.MapControllers();
 
 app.Run();

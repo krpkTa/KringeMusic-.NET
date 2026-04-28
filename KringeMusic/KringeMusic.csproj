@@ -23,6 +23,9 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
+    <Folder Include="wwwroot\uploads\artists\" />
+    <Folder Include="wwwroot\uploads\labels\" />
+    <Folder Include="wwwroot\uploads\tracks\" />
   </ItemGroup>
 
 </Project>

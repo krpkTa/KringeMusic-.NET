@@ -35,13 +35,11 @@ namespace DataLayer
             {
                 entity.ToTable("record_label");
                 entity.HasKey(e => e.LabelId);
-                entity.Property(e => e.LabelId).HasColumnName("label_id").HasDefaultValueSql("nextval('increment_seq')");
+                entity.Property(e => e.LabelId).HasColumnName("label_id").UseIdentityColumn();
                 entity.Property(e => e.Name).HasColumnName("name");
                 entity.Property(e => e.Country).HasColumnName("country");
-                // если добавили поля – настройте
-                entity.Property(e => e.FoundedYear).HasColumnName("founded_year");
-                entity.Property(e => e.LogoLink).HasColumnName("logo_link");
-                entity.Property(e => e.Description).HasColumnName("description");
+                entity.Property(e => e.CoverLink).HasColumnName("cover_link");
+                
             });
 
             // Конфигурация Artist
@@ -49,7 +47,7 @@ namespace DataLayer
             {
                 entity.ToTable("artist");
                 entity.HasKey(e => e.ArtistId);
-                entity.Property(e => e.ArtistId).HasColumnName("artist_id").HasDefaultValueSql("nextval('increment_seq')");
+                entity.Property(e => e.ArtistId).HasColumnName("artist_id").UseIdentityColumn();
                 entity.Property(e => e.Name).HasColumnName("name");
                 entity.Property(e => e.Description).HasColumnName("description");
                 entity.Property(e => e.CoverLink).HasColumnName("cover_link");
@@ -66,7 +64,7 @@ namespace DataLayer
             {
                 entity.ToTable("track");
                 entity.HasKey(e => e.TrackId);
-                entity.Property(e => e.TrackId).HasColumnName("track_id").HasDefaultValueSql("nextval('increment_seq')");
+                entity.Property(e => e.TrackId).HasColumnName("track_id").UseIdentityColumn();
                 entity.Property(e => e.Name).HasColumnName("name");
                 entity.Property(e => e.Duration).HasColumnName("duration");
                 entity.Property(e => e.ReleaseDate).HasColumnName("release_date");
@@ -112,7 +110,7 @@ namespace DataLayer
             {
                 entity.ToTable("genre");
                 entity.HasKey(e => e.GenreId);
-                entity.Property(e => e.GenreId).HasColumnName("genre_id").HasDefaultValueSql("nextval('increment_seq')");
+                entity.Property(e => e.GenreId).HasColumnName("genre_id").UseIdentityColumn();
                 entity.Property(e => e.Name).HasColumnName("name");
             });
 
@@ -120,8 +118,17 @@ namespace DataLayer
             {
                 entity.ToTable("track_genres");
                 entity.HasKey(e => new { e.GenreId, e.TrackId });
-                entity.HasOne(e => e.Genre).WithMany(g => g.TrackGenres).HasForeignKey(e => e.GenreId);
-                entity.HasOne(e => e.Track).WithMany(t => t.TrackGenres).HasForeignKey(e => e.TrackId);
+
+                entity.Property(e => e.GenreId).HasColumnName("genre_id");
+                entity.Property(e => e.TrackId).HasColumnName("track_id");
+
+                entity.HasOne(e => e.Genre)
+                      .WithMany(g => g.TrackGenres)
+                      .HasForeignKey(e => e.GenreId);
+
+                entity.HasOne(e => e.Track)
+                      .WithMany(t => t.TrackGenres)
+                      .HasForeignKey(e => e.TrackId);
             });
 
             modelBuilder.Entity<ArtistGenre>(entity =>
