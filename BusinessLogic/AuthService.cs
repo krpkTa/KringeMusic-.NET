@@ -44,6 +44,7 @@ namespace BusinessLogic
                 Login = login,
                 Email = email,
                 PasswordHash = passwordHash,
+                RoleId = 1
             };
             await _userRepository.CreateUser(newUser);
 

@@ -134,9 +134,17 @@ namespace DataLayer
             modelBuilder.Entity<ArtistGenre>(entity =>
             {
                 entity.ToTable("artist_genres");
-                entity.HasKey(e => new { e.GenreId, e.ArtistId });
-                entity.HasOne(e => e.Genre).WithMany(g => g.ArtistGenres).HasForeignKey(e => e.GenreId);
-                entity.HasOne(e => e.Artist).WithMany(a => a.ArtistGenres).HasForeignKey(e => e.ArtistId);
+                entity.HasKey(ag => new { ag.GenreId, ag.ArtistId });
+                entity.Property(ag => ag.GenreId).HasColumnName("genre_id");
+                entity.Property(ag => ag.ArtistId).HasColumnName("artist_id");
+
+                entity.HasOne(ag => ag.Genre)
+                      .WithMany(g => g.ArtistGenres)
+                      .HasForeignKey(ag => ag.GenreId);
+
+                entity.HasOne(ag => ag.Artist)
+                      .WithMany(a => a.ArtistGenres)
+                      .HasForeignKey(ag => ag.ArtistId);
             });
 
         }

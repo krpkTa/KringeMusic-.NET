@@ -8,5 +8,6 @@ namespace KringeMusic.DTOs.Artist
         public string? Description { get; set; }
         public int? LabelId { get; set; } 
         public IFormFile? CoverFile { get; set; } 
+        public List<int> GenreIds { get; set; } = new List<int>();
     }
 }

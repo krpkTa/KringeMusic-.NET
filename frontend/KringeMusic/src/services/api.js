@@ -66,7 +66,11 @@ export const api = {
     if (!res.ok) throw new Error('Failed to update artist');
     return res.json();
   },
-
+async getArtistById(id) {
+  const res = await fetch(`${API_BASE_URL}/Artists/${id}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch artist');
+  return res.json();
+},
   async deleteArtist(id) {
     const res = await fetch(`${API_BASE_URL}/artists/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Failed to delete artist');
@@ -77,7 +81,11 @@ async getLabels(search = '', page = 1, pageSize = 10) {
   if (!res.ok) throw new Error('Failed to fetch labels');
   return res.json();
 },
-
+async getLabelById(id) {
+  const res = await fetch(`${API_BASE_URL}/RecordLabel/${id}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch label');
+  return res.json();
+},
 // ✔️ Исправлено: принимаем FormData
 async createLabel(formData) {
   const res = await fetch(`${API_BASE_URL}/RecordLabel`, {
@@ -119,7 +127,11 @@ async getTracks(search = '', page = 1, pageSize = 10) {
   if (!res.ok) throw new Error('Failed to fetch tracks');
   return res.json();
 },
-
+async getTrackById(id) {
+  const res = await fetch(`${API_BASE_URL}/Track/${id}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch track');
+  return res.json();
+},
 async createTrack(formData) {
   // было: /Tracks, стало: /Track
   const res = await fetch(`${API_BASE_URL}/Track`, {
@@ -131,13 +143,14 @@ async createTrack(formData) {
 },
 
 async updateTrack(id, formData) {
-  formData.append('trackId', id);
-  // было: /Tracks/${id}, стало: /Track/${id}
   const res = await fetch(`${API_BASE_URL}/Track/${id}`, {
     method: 'PUT',
     body: formData,
   });
-  if (!res.ok) throw new Error('Failed to update track');
+  if (!res.ok) {
+    const text = await res.text(); // получаем текст ошибки
+    throw new Error(text || 'Failed to update track');
+  }
   return res.json();
 },
 

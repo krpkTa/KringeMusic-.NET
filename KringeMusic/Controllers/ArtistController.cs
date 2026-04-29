@@ -18,11 +18,18 @@ public class ArtistsController : ControllerBase
         var artists = await _artistService.GetAllAsync(search, page, pageSize, HttpContext.RequestAborted);
         return Ok(artists);
     }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var artist = await _artistService.GetByIdAsync(id, HttpContext.RequestAborted);
+        if (artist == null) return NotFound();
+        return Ok(artist);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] ArtistCreateDto dto)
     {
-        var result = await _artistService.CreateAsync(dto.Name, dto.Description, dto.LabelId);
+        var result = await _artistService.CreateAsync(dto.Name, dto.Description, dto.LabelId, dto.GenreIds);
         return Ok(result);
     }
 
@@ -31,7 +38,7 @@ public class ArtistsController : ControllerBase
     {
         if (id != dto.ArtistId) return BadRequest("ID mismatch");
 
-        var result = await _artistService.UpdateAsync(dto.ArtistId, dto.Name, dto.Description, dto.LabelId, dto.CoverFile, HttpContext.RequestAborted);
+        var result = await _artistService.UpdateAsync(dto.ArtistId, dto.Name, dto.Description, dto.LabelId, dto.CoverFile, dto.GenreIds, HttpContext.RequestAborted);
 
         return Ok(result);
     }

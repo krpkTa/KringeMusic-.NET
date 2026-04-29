@@ -9,5 +9,6 @@
         public string? LabelName { get; set; }
         public int AlbumsCount { get; set; }        
         public int TracksCount { get; set; }       
+        public List<string> Genres { get; set; } = new List<string>();
     }
 }

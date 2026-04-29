@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Genre
 {
-    public class GenreUpdateDto
+    public class GenreUpdateDto : GenreCreateDto
     {
         public int GenreId { get; set; }
-        public string Name { get; set; }
     }
 }

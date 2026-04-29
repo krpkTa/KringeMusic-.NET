@@ -65,8 +65,6 @@ namespace KringeMusic.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] TrackUpdateDto dto)
         {
-            if (id != dto.TrackId)
-                return BadRequest("ID mismatch");
 
             try
             {
@@ -78,7 +76,7 @@ namespace KringeMusic.Controllers
                 
 
                 var result = await _trackService.UpdateAsync(
-                    dto.TrackId,
+                    id,
                     dto.Name,
                     dto.Duration,
                     dto.ReleaseDate,
@@ -93,7 +91,8 @@ namespace KringeMusic.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                // Для отладки – вернуть полную ошибку
+                return BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
         }
 

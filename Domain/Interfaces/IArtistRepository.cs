@@ -16,7 +16,9 @@ namespace Domain.Interfaces
         Task<List<Artist>> GetArtistsPaginated(string? search, int page, int pageSize, CancellationToken ct);
         Task UpdateArtist(Artist artist, CancellationToken ct);
         Task DeleteArtist(int id, CancellationToken ct);
-
-
+        Task AddGenresToArtist(int artistId, List<int> genreIds, CancellationToken ct);
+        Task RemoveAllGenresFromArtist(int artistId, CancellationToken ct);
+        Task<Artist?> GetArtistWithDetails(int id, CancellationToken ct);
+        Task<int> GetTracksCountAsync(int artistId, CancellationToken ct);
     }
 }
