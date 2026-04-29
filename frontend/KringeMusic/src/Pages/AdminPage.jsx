@@ -11,6 +11,11 @@ const AdminPage = () => {
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Жанры
+  const [genreForm, setGenreForm] = useState({ name: '' });
+  const [editingGenre, setEditingGenre] = useState(null);
+  const [editingGenreData, setEditingGenreData] = useState({ name: '' });
+
   // Форма добавления артиста
   const [artistForm, setArtistForm] = useState({
     name: '',
@@ -74,7 +79,6 @@ const AdminPage = () => {
   const [editingLabel, setEditingLabel] = useState(null);
   const [editingTrack, setEditingTrack] = useState(null);
 
-  // Состояния загрузки для кнопок
   const [submitting, setSubmitting] = useState(false);
   const [updating, setUpdating] = useState(false);
 
@@ -127,6 +131,7 @@ const AdminPage = () => {
       setGenres(data);
     } catch (err) {
       console.error(err);
+      alert('Ошибка загрузки жанров');
     }
   };
 
@@ -134,6 +139,7 @@ const AdminPage = () => {
     if (activeTab === 'artists') loadArtists();
     if (activeTab === 'labels') loadLabels();
     if (activeTab === 'tracks') loadTracks();
+    if (activeTab === 'genres') loadGenres();
   }, [activeTab]);
 
   useEffect(() => {
@@ -182,10 +188,16 @@ const AdminPage = () => {
   const startEditArtist = async (artistId) => {
     try {
       const artist = await api.getArtistById(artistId);
+      // Если API не вернул labelId, но вернул labelName – найдём labelId из списка
+      let labelId = artist.labelId;
+      if (!labelId && artist.labelName && labels.length) {
+        const found = labels.find(l => l.name === artist.labelName);
+        if (found) labelId = found.labelId;
+      }
       setEditingArtistData({
         name: artist.name,
         description: artist.description || '',
-        labelId: artist.labelId || '',
+        labelId: labelId || '',
         coverUrl: artist.coverUrl,
         coverFile: null,
         genreIds: artist.genres?.map(g => g.genreId) || [],
@@ -403,6 +415,54 @@ const AdminPage = () => {
     }
   };
 
+  // ========== ЖАНРЫ ==========
+  const handleGenreSubmit = async (e) => {
+    e.preventDefault();
+    if (!genreForm.name.trim()) return;
+    setSubmitting(true);
+    try {
+      await api.createGenre(genreForm.name.trim());
+      alert('Жанр создан');
+      setGenreForm({ name: '' });
+      await loadGenres();
+    } catch (err) {
+      alert('Ошибка: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const startEditGenre = (genre) => {
+    setEditingGenre(genre.genreId);
+    setEditingGenreData({ name: genre.name });
+  };
+
+  const handleUpdateGenreSubmit = async () => {
+    if (!editingGenreData.name.trim()) return;
+    setUpdating(true);
+    try {
+      await api.updateGenre(editingGenre, editingGenreData.name.trim());
+      alert('Жанр обновлён');
+      setEditingGenre(null);
+      await loadGenres();
+    } catch (err) {
+      alert('Ошибка обновления: ' + err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteGenre = async (id) => {
+    if (window.confirm('Удалить жанр? Это действие может затронуть артистов и треки, связанные с ним.')) {
+      try {
+        await api.deleteGenre(id);
+        await loadGenres();
+      } catch (err) {
+        alert('Ошибка удаления: ' + err.message);
+      }
+    }
+  };
+
   // ========== ВСПОМОГАТЕЛЬНЫЕ ==========
   const getLabelName = (labelId) => {
     const label = labels.find(l => l.labelId === labelId);
@@ -414,17 +474,20 @@ const AdminPage = () => {
     <div className="admin-page">
       <div className="admin-container">
         <div className="admin-header">
-          <h1>🎵 Панель управления</h1>
+          <h1>Панель управления</h1>
         </div>
         <div className="tabs">
           <button className={`tab-btn ${activeTab === 'artists' ? 'active' : ''}`} onClick={() => setActiveTab('artists')}>
-            🎤 Артисты
+            Артисты
           </button>
           <button className={`tab-btn ${activeTab === 'labels' ? 'active' : ''}`} onClick={() => setActiveTab('labels')}>
-            🏷️ Лейблы
+            Лейблы
           </button>
           <button className={`tab-btn ${activeTab === 'tracks' ? 'active' : ''}`} onClick={() => setActiveTab('tracks')}>
-            🎧 Треки
+            Треки
+          </button>
+          <button className={`tab-btn ${activeTab === 'genres' ? 'active' : ''}`} onClick={() => setActiveTab('genres')}>
+            Жанры
           </button>
         </div>
 
@@ -432,7 +495,7 @@ const AdminPage = () => {
         {activeTab === 'artists' && (
           <div className="section">
             <div className="form-card admin-form">
-              <h3>➕ Добавить артиста</h3>
+              <h3>Добавить артиста</h3>
               <form onSubmit={handleArtistSubmit}>
                 <div className="input-group">
                   <label>Имя артиста <span className="required">*</span></label>
@@ -493,15 +556,15 @@ const AdminPage = () => {
                   </select>
                 </div>
                 <button type="submit" disabled={submitting || !artistForm.name}>
-                  {submitting ? 'Создание...' : '✨ Создать артиста'}
+                  {submitting ? 'Создание...' : 'Создать артиста'}
                 </button>
               </form>
             </div>
 
             <div className="items-grid">
-              <h3>📋 Существующие артисты</h3>
+              <h3>Существующие артисты</h3>
               {loading && <div className="loading-spinner">Загрузка...</div>}
-              {!loading && artists.length === 0 && <div className="empty-state">😕 Артисты не найдены</div>}
+              {!loading && artists.length === 0 && <div className="empty-state">Артисты не найдены</div>}
               <div className="grid">
                 {artists.map(artist => (
                   <div className="item-card" key={artist.artistId}>
@@ -553,9 +616,9 @@ const AdminPage = () => {
                         </select>
                         <div className="edit-actions">
                           <button onClick={handleUpdateArtistSubmit} disabled={updating}>
-                            {updating ? 'Сохранение...' : '💾 Сохранить'}
+                            {updating ? 'Сохранение...' : 'Сохранить'}
                           </button>
-                          <button onClick={() => setEditingArtist(null)}>❌ Отмена</button>
+                          <button onClick={() => setEditingArtist(null)}>Отмена</button>
                         </div>
                       </div>
                     ) : (
@@ -570,7 +633,7 @@ const AdminPage = () => {
                         <div className="item-info">
                           <h4>{artist.name}</h4>
                           {artist.description && <p>{artist.description.substring(0, 60)}...</p>}
-                          <p>Лейбл: {artist.labelName || '—'}</p>
+                          <p>Лейбл: {artist.labelName || getLabelName(artist.labelId)}</p>
                           <p>Жанры: {artist.genres?.join(', ') || '—'}</p>
                           <p>Треков: {artist.tracksCount || 0}</p>
                         </div>
@@ -591,7 +654,7 @@ const AdminPage = () => {
         {activeTab === 'labels' && (
           <div className="section">
             <div className="form-card admin-form">
-              <h3>➕ Добавить лейбл</h3>
+              <h3>Добавить лейбл</h3>
               <form onSubmit={handleLabelSubmit}>
                 <div className="input-group">
                   <label>Название лейбла <span className="required">*</span></label>
@@ -623,14 +686,14 @@ const AdminPage = () => {
                   <small>Квадратное изображение, предпочтительно PNG</small>
                 </div>
                 <button type="submit" disabled={submitting || !labelForm.name}>
-                  {submitting ? 'Создание...' : '🏷️ Создать лейбл'}
+                  {submitting ? 'Создание...' : 'Создать лейбл'}
                 </button>
               </form>
             </div>
 
             <div className="items-grid">
-              <h3>📋 Существующие лейблы</h3>
-              {labels.length === 0 && !loading && <div className="empty-state">📭 Лейблы не найдены</div>}
+              <h3>Существующие лейблы</h3>
+              {labels.length === 0 && !loading && <div className="empty-state">Лейблы не найдены</div>}
               <div className="grid">
                 {labels.map(label => (
                   <div className="item-card" key={label.labelId}>
@@ -661,9 +724,9 @@ const AdminPage = () => {
                         />
                         <div className="edit-actions">
                           <button onClick={handleUpdateLabelSubmit} disabled={updating}>
-                            {updating ? 'Сохранение...' : '💾 Сохранить'}
+                            {updating ? 'Сохранение...' : 'Сохранить'}
                           </button>
-                          <button onClick={() => setEditingLabel(null)}>❌ Отмена</button>
+                          <button onClick={() => setEditingLabel(null)}>Отмена</button>
                         </div>
                       </div>
                     ) : (
@@ -677,8 +740,8 @@ const AdminPage = () => {
                         </div>
                         <div className="item-info">
                           <h4>{label.name}</h4>
-                          {label.country && <p>🌍 Страна: {label.country}</p>}
-                          <p>🎤 Артистов: {label.artistsCount || 0}</p>
+                          {label.country && <p>Страна: {label.country}</p>}
+                          <p>Артистов: {label.artistsCount || 0}</p>
                         </div>
                         <div className="card-actions">
                           <button className="edit-btn" onClick={() => startEditLabel(label.labelId)} title="Редактировать">✏️</button>
@@ -697,7 +760,7 @@ const AdminPage = () => {
         {activeTab === 'tracks' && (
           <div className="section">
             <div className="form-card admin-form">
-              <h3>➕ Добавить трек</h3>
+              <h3>Добавить трек</h3>
               <form onSubmit={handleTrackSubmit}>
                 <div className="input-group">
                   <label>Название трека <span className="required">*</span></label>
@@ -770,7 +833,7 @@ const AdminPage = () => {
                           const newArtists = trackForm.artists.filter((_, i) => i !== idx);
                           setTrackForm({ ...trackForm, artists: newArtists });
                         }}
-                      >🗑️</button>
+                      >Удалить</button>
                     </div>
                   ))}
                   <button
@@ -821,15 +884,15 @@ const AdminPage = () => {
                   />
                 </div>
                 <button type="submit" disabled={submitting || !trackForm.name || !trackForm.trackFile}>
-                  {submitting ? 'Загрузка...' : '🎵 Создать трек'}
+                  {submitting ? 'Загрузка...' : 'Создать трек'}
                 </button>
               </form>
             </div>
 
             <div className="items-grid">
-              <h3>🎵 Существующие треки</h3>
+              <h3>Существующие треки</h3>
               {loading && <div className="loading-spinner">Загрузка...</div>}
-              {!loading && tracks.length === 0 && <div className="empty-state">🎧 Треки не найдены</div>}
+              {!loading && tracks.length === 0 && <div className="empty-state">Треки не найдены</div>}
               <div className="grid">
                 {tracks.map(track => (
                   <div className="item-card" key={track.trackId}>
@@ -893,7 +956,7 @@ const AdminPage = () => {
                                   const newArtists = editingTrackData.artists.filter((_, i) => i !== idx);
                                   setEditingTrackData({ ...editingTrackData, artists: newArtists });
                                 }}
-                              >🗑️</button>
+                              >Удалить</button>
                             </div>
                           ))}
                           <button
@@ -944,9 +1007,9 @@ const AdminPage = () => {
                         />
                         <div className="edit-actions">
                           <button onClick={handleUpdateTrackSubmit} disabled={updating}>
-                            {updating ? 'Сохранение...' : '💾 Сохранить'}
+                            {updating ? 'Сохранение...' : 'Сохранить'}
                           </button>
-                          <button onClick={() => setEditingTrack(null)}>❌ Отмена</button>
+                          <button onClick={() => setEditingTrack(null)}>Отмена</button>
                         </div>
                       </div>
                     ) : (
@@ -961,7 +1024,7 @@ const AdminPage = () => {
                         <div className="item-info">
                           <h4>{track.name}</h4>
                           <p>
-                            🎤 Исполнители:{' '}
+                            Исполнители:{' '}
                             {track.artists?.map((a, idx) => (
                               <span key={a.artistId}>
                                 {a.name}{a.isPrimary && ' (осн.)'}
@@ -969,13 +1032,79 @@ const AdminPage = () => {
                               </span>
                             ))}
                           </p>
-                          <p>🎸 Жанры: {track.genres?.join(', ') || '—'}</p>
-                          <p>📅 Дата: {new Date(track.releaseDate).toLocaleDateString()}</p>
-                          <p>⏱️ Длительность: {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</p>
+                          <p>Жанры: {track.genres?.join(', ') || '—'}</p>
+                          <p>Дата: {new Date(track.releaseDate).toLocaleDateString()}</p>
+                          <p>Длительность: {Math.floor(track.duration / 60)}:{String(track.duration % 60).padStart(2, '0')}</p>
                         </div>
                         <div className="card-actions">
                           <button className="edit-btn" onClick={() => startEditTrack(track.trackId)} title="Редактировать">✏️</button>
                           <button className="delete-btn" onClick={() => handleDeleteTrack(track.trackId)} title="Удалить">🗑️</button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ---------- ЖАНРЫ ---------- */}
+        {activeTab === 'genres' && (
+          <div className="section">
+            <div className="form-card admin-form">
+              <h3>Добавить жанр</h3>
+              <form onSubmit={handleGenreSubmit}>
+                <div className="input-group">
+                  <label>Название жанра <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    value={genreForm.name}
+                    onChange={e => setGenreForm({ name: e.target.value })}
+                    placeholder="Например: Rock, Jazz, Electronic"
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+                <button type="submit" disabled={submitting || !genreForm.name.trim()}>
+                  {submitting ? 'Создание...' : 'Создать жанр'}
+                </button>
+              </form>
+            </div>
+
+            <div className="items-grid">
+              <h3>Существующие жанры</h3>
+              {genres.length === 0 && !loading && <div className="empty-state">Жанры не найдены</div>}
+              <div className="grid">
+                {genres.map(genre => (
+                  <div className="item-card" key={genre.genreId}>
+                    {editingGenre === genre.genreId ? (
+                      <div className="edit-form">
+                        <input
+                          type="text"
+                          value={editingGenreData.name}
+                          onChange={e => setEditingGenreData({ name: e.target.value })}
+                          placeholder="Название жанра"
+                          autoFocus
+                        />
+                        <div className="edit-actions">
+                          <button onClick={handleUpdateGenreSubmit} disabled={updating || !editingGenreData.name.trim()}>
+                            {updating ? 'Сохранение...' : 'Сохранить'}
+                          </button>
+                          <button onClick={() => setEditingGenre(null)}>Отмена</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="item-icon">
+                          <span className="no-image">🎸</span>
+                        </div>
+                        <div className="item-info">
+                          <h4>{genre.name}</h4>
+                        </div>
+                        <div className="card-actions">
+                          <button className="edit-btn" onClick={() => startEditGenre(genre)} title="Редактировать">✏️</button>
+                          <button className="delete-btn" onClick={() => handleDeleteGenre(genre.genreId)} title="Удалить">🗑️</button>
                         </div>
                       </>
                     )}
