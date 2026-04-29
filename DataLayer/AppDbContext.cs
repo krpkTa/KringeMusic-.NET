@@ -17,11 +17,11 @@ namespace DataLayer
         public DbSet<RecordLabel> RecordLabels { get; set; }
         public DbSet<Track> Tracks { get; set; }
         public DbSet<Genre> Genres { get; set; }
-        //public DbSet<Album> Albums { get; set; }
+        public DbSet<Album> Albums { get; set; }
         public DbSet<ArtistTrack> ArtistTracks { get; set; }
         public DbSet<TrackGenre> TrackGenres { get; set; }
         public DbSet<ArtistGenre> ArtistGenres { get; set; }
-        //public DbSet<AlbumTrack> AlbumTracks { get; set; }
+        public DbSet<AlbumTrack> AlbumTracks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,20 +73,41 @@ namespace DataLayer
             });
 
             // Альбом (составной ключ)
-            //modelBuilder.Entity<Album>(entity =>
-            //{
-            //    entity.ToTable("album");
-            //    entity.HasKey(e => new { e.ArtistId, e.AlbumId });
-            //    entity.Property(e => e.ArtistId).HasColumnName("artist_id");
-            //    entity.Property(e => e.AlbumId).HasColumnName("album_id").UseIdentityColumn();
-            //    entity.Property(e => e.Name).HasColumnName("name");
-            //    entity.Property(e => e.ReleaseDate).HasColumnName("release_date");
-            //    entity.Property(e => e.CoverLink).HasColumnName("cover_link");
+            modelBuilder.Entity<Album>(entity =>
+            {
+                entity.ToTable("album");
+                entity.HasKey(e => new { e.ArtistId, e.AlbumId });
+                entity.Property(e => e.ArtistId).HasColumnName("artist_id");
+                entity.Property(e => e.AlbumId).HasColumnName("album_id").UseIdentityColumn();
+                entity.Property(e => e.Name).HasColumnName("name");
+                entity.Property(e => e.ReleaseDate).HasColumnName("release_date");
+                entity.Property(e => e.CoverLink).HasColumnName("cover_link");
 
-            //    entity.HasOne(e => e.Artist)
-            //          .WithMany(a => a.Albums)
-            //          .HasForeignKey(e => e.ArtistId);
-            //});
+                entity.HasOne(e => e.Artist)
+                      .WithMany(a => a.Albums)
+                      .HasForeignKey(e => e.ArtistId);
+            });
+
+            // AlbumTrack (связь альбом-трек)
+            modelBuilder.Entity<AlbumTrack>(entity =>
+            {
+                entity.ToTable("album_tracks");
+                entity.HasKey(e => new { e.ArtistId, e.AlbumId, e.TrackId });
+
+                entity.Property(e => e.ArtistId).HasColumnName("artist_id");
+                entity.Property(e => e.AlbumId).HasColumnName("album_id");
+                entity.Property(e => e.TrackId).HasColumnName("track_id");
+
+                entity.HasOne(e => e.Album)
+                      .WithMany(a => a.AlbumTracks)
+                      .HasForeignKey(e => new { e.ArtistId, e.AlbumId })
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Track)
+                      .WithMany(t => t.AlbumTracks)
+                      .HasForeignKey(e => e.TrackId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // Связка Artist-Track
             modelBuilder.Entity<ArtistTrack>(entity =>

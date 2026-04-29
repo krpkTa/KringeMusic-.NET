@@ -43,6 +43,12 @@ namespace KringeMusic.Controllers
                 var artistIds = artistAssignments.Select(a => a.ArtistId).ToList();
                 var isPrimaryFlags = artistAssignments.Select(a => a.IsPrimary).ToList();
 
+                // В методе Create
+                if (dto.ReleaseDate.Kind == DateTimeKind.Unspecified)
+                {
+                    dto.ReleaseDate = DateTime.SpecifyKind(dto.ReleaseDate, DateTimeKind.Utc);
+                }
+
                 var result = await _trackService.CreateAsync(
                     dto.Name,
                     dto.Duration,
@@ -91,8 +97,7 @@ namespace KringeMusic.Controllers
             }
             catch (Exception ex)
             {
-                // Для отладки – вернуть полную ошибку
-                return BadRequest(ex.InnerException?.Message ?? ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 

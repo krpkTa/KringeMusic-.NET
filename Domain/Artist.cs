@@ -17,7 +17,7 @@ namespace Domain
         public string? CoverLink { get; set; }
 
         public virtual RecordLabel? Label { get; set; }
-       // public virtual ICollection<Album> Albums { get; set; } = new List<Album>();
+        public virtual ICollection<Album> Albums { get; set; } = new List<Album>();
         public virtual ICollection<ArtistTrack> ArtistTracks { get; set; } = new List<ArtistTrack>();
         public virtual ICollection<ArtistGenre> ArtistGenres { get; set; } = new List<ArtistGenre>();
     }

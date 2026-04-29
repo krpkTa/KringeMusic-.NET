@@ -104,5 +104,6 @@ namespace DataLayer
 
         public async Task<bool> ExistsGenre(int genreId, CancellationToken ct)
             => await _context.Genres.AnyAsync(g => g.GenreId == genreId, ct);
+        public async Task<bool> ExistsAsync(int trackId, CancellationToken ct) => await _context.Tracks.AnyAsync(t => t.TrackId == trackId, ct);
     }
 }

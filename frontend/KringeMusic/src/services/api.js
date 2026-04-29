@@ -133,24 +133,24 @@ async getTrackById(id) {
   return res.json();
 },
 async createTrack(formData) {
-  // было: /Tracks, стало: /Track
+  const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE_URL}/Track`, {
     method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
     body: formData,
   });
-  if (!res.ok) throw new Error('Failed to create track');
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 },
 
 async updateTrack(id, formData) {
+  const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE_URL}/Track/${id}`, {
     method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}` },
     body: formData,
   });
-  if (!res.ok) {
-    const text = await res.text(); // получаем текст ошибки
-    throw new Error(text || 'Failed to update track');
-  }
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 },
 
@@ -191,5 +191,74 @@ async updateGenre(id, name) {
 async deleteGenre(id) {
   const res = await fetch(`${API_BASE_URL}/Genre/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete genre');
+},
+// ---------- АЛЬБОМЫ ----------
+// Получить все альбомы артиста (с пагинацией)
+async getArtistAlbums(artistId, page = 1, pageSize = 10) {
+  const params = new URLSearchParams({ page, pageSize });
+  const res = await fetch(`${API_BASE_URL}/artists/${artistId}/albums?${params}`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to fetch albums');
+  return res.json();
+},
+
+// Получить один альбом
+async getAlbum(artistId, albumId) {
+  const res = await fetch(`${API_BASE_URL}/artists/${artistId}/albums/${albumId}`, {
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to fetch album');
+  return res.json();
+},
+
+// Создать альбом
+async createAlbum(artistId, formData) {
+  const res = await fetch(`${API_BASE_URL}/artists/${artistId}/albums`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!res.ok) throw new Error('Failed to create album');
+  return res.json();
+},
+
+// Обновить альбом
+async updateAlbum(artistId, albumId, formData) {
+  formData.append('ArtistId', artistId);
+  formData.append('AlbumId', albumId);
+  const res = await fetch(`${API_BASE_URL}/artists/${artistId}/albums/${albumId}`, {
+    method: 'PUT',
+    body: formData,
+  });
+  if (!res.ok) throw new Error('Failed to update album');
+  return res.json();
+},
+
+// Удалить альбом
+async deleteAlbum(artistId, albumId) {
+  const res = await fetch(`${API_BASE_URL}/artists/${artistId}/albums/${albumId}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete album');
+},
+
+// Добавить треки в альбом
+async addTracksToAlbum(artistId, albumId, trackIds) {
+  const res = await fetch(`${API_BASE_URL}/artists/${artistId}/albums/${albumId}/tracks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders() },
+    body: JSON.stringify({ trackIds }),
+  });
+  if (!res.ok) throw new Error('Failed to add tracks');
+},
+
+// Удалить треки из альбома
+async removeTracksFromAlbum(artistId, albumId, trackIds) {
+  const res = await fetch(`${API_BASE_URL}/artists/${artistId}/albums/${albumId}/tracks`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...getHeaders() },
+    body: JSON.stringify({ trackIds }),
+  });
+  if (!res.ok) throw new Error('Failed to remove tracks');
 },
 };
