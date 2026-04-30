@@ -47,6 +47,8 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
 builder.Services.AddScoped<IUserPreferencesRepository, UserPreferencesRepository>();
 builder.Services.AddScoped<ISearchRepository, SearchRepository>();
+builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+builder.Services.AddScoped<FavoritesService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<UserPreferencesService>();
 builder.Services.AddScoped<AlbumService>();
@@ -64,12 +66,14 @@ builder.Services.AddDbContext<DataLayer.AppDbContext>(options =>
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5174")  // URL твоего фронта (Vite по умолчанию 5173-5174)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();  // если используешь куки или авторизацию через токен в заголовке
+        });
 });
 
 var app = builder.Build();
@@ -80,7 +84,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();

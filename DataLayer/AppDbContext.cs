@@ -24,7 +24,9 @@ namespace DataLayer
         public DbSet<AlbumTrack> AlbumTracks { get; set; }
         public DbSet<UserArtist> UserArtists { get; set; }
         public DbSet<UserGenre> UserGenres { get; set; }
-
+        public DbSet<Playlist> Playlists { get; set; }
+        public DbSet<PlaylistType> PlaylistTypes { get; set; }
+        public DbSet<PlaylistTrack> PlaylistTracks { get; set; } // добавлено
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -206,6 +208,54 @@ namespace DataLayer
                       .WithMany(u => u.UserArtists)
                       .HasForeignKey(ua => ua.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Внутри OnModelCreating после остальных конфигураций
+
+            modelBuilder.Entity<PlaylistType>(entity =>
+            {
+                entity.ToTable("playlist_type");
+                entity.HasKey(e => e.TypeId);
+                entity.Property(e => e.TypeId).HasColumnName("type_id").ValueGeneratedNever(); // или UseIdentityColumn, если автоинкремент
+                entity.Property(e => e.Name).HasColumnName("name");
+            });
+
+            modelBuilder.Entity<Playlist>(entity =>
+            {
+                entity.ToTable("playlist");
+                entity.HasKey(e => new { e.TypeId, e.UserId, e.PlaylistId });
+                entity.Property(e => e.TypeId).HasColumnName("type_id");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.PlaylistId).HasColumnName("playlist_id");
+                entity.Property(e => e.Name).HasColumnName("name");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+
+                entity.HasOne(e => e.Type)
+                      .WithMany(t => t.Playlists)
+                      .HasForeignKey(e => e.TypeId);
+
+                entity.HasOne(e => e.User)
+                      .WithMany(u => u.Playlists) // если у User есть коллекция Playlists
+                      .HasForeignKey(e => e.UserId);
+            });
+
+            modelBuilder.Entity<PlaylistTrack>(entity =>
+            {
+                entity.ToTable("playlist_tracks");
+                entity.HasKey(e => new { e.TrackId, e.TypeId, e.UserId, e.PlaylistId });
+                entity.Property(e => e.TrackId).HasColumnName("track_id");
+                entity.Property(e => e.TypeId).HasColumnName("type_id");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.PlaylistId).HasColumnName("playlist_id");
+                entity.Property(e => e.AddedAt).HasColumnName("added_at");
+
+                entity.HasOne(e => e.Track)
+                      .WithMany(t => t.PlaylistTracks) // добавьте в Track коллекцию
+                      .HasForeignKey(e => e.TrackId);
+
+                entity.HasOne(e => e.Playlist)
+                      .WithMany(p => p.PlaylistTracks)
+                      .HasForeignKey(e => new { e.TypeId, e.UserId, e.PlaylistId });
             });
 
         }

@@ -178,7 +178,8 @@
   color: #e2e8f0;
   margin-bottom: 0.2rem;
 }
-
+.track-row { display: flex; align-items: center; gap: 12px; } 
+.track-like { margin-left: auto; }
 .card p {
   font-size: 0.75rem;
   color: #94a3b8;

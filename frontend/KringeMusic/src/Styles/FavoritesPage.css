@@ -1,0 +1,176 @@
+/* FavoritesPage.css */
+.favorites-page {
+  padding: 20px 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.favorites-page h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #fff;
+}
+
+/* Таблица треков – используем те же стили, что и на PlayerPage */
+.tracks-table {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 50px 1fr 80px 50px;
+  padding: 12px 16px;
+  color: #b3b3b3;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.table-header span:first-child { justify-self: center; }
+.table-header span:last-child { justify-self: end; padding-right: 16px; }
+
+.track-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 80px 50px;
+  align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.track-row:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.track-number {
+  justify-self: center;
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.track-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.track-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.track-title {
+  font-weight: 500;
+  color: #fff;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-artist {
+  font-size: 13px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-duration {
+  justify-self: start;
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.track-like {
+  justify-self: end;
+  margin-right: 8px;
+}
+
+/* Пустое состояние */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #b3b3b3;
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  margin-top: 30px;
+}
+
+/* Пагинация */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #1ed760;
+  color: #000;
+  transform: scale(1.02);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  background: #1ed760;
+  color: #000;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .favorites-page {
+    padding: 15px;
+  }
+
+  .table-header {
+    grid-template-columns: 40px 1fr 60px 40px;
+    font-size: 12px;
+  }
+
+  .track-row {
+    grid-template-columns: 40px 1fr 60px 40px;
+    padding: 6px 12px;
+  }
+
+  .track-cover {
+    width: 32px;
+    height: 32px;
+  }
+
+  .track-title {
+    font-size: 13px;
+  }
+
+  .track-artist {
+    font-size: 11px;
+  }
+
+  .track-duration {
+    font-size: 12px;
+  }
+}

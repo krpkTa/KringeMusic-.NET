@@ -18,5 +18,6 @@ namespace Domain
         public virtual ICollection<ArtistTrack> ArtistTracks { get; set; } = new List<ArtistTrack>();
         public virtual ICollection<TrackGenre> TrackGenres { get; set; } = new List<TrackGenre>();
         public virtual ICollection<AlbumTrack> AlbumTracks { get; set; } = new List<AlbumTrack>();
+        public virtual ICollection<PlaylistTrack> PlaylistTracks { get; set; } = new List<PlaylistTrack>();
     }
 }

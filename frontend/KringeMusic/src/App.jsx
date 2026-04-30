@@ -5,6 +5,8 @@ import OnBoardingPage from './Pages/OnBoardingPage'; // имя импорта с
 import PlayerPage from './Pages/PlayerPage';
 import SearchPage from './Pages/Searchpage';
 import ArtistPage from './Pages/ArtistPage';
+import FavoritesPage from './Pages/FavoritePage';
+
 function App() {
   return (
     <Routes>
@@ -14,6 +16,7 @@ function App() {
       <Route path='/player' element={<PlayerPage/>} />
       <Route path="/search" element={<SearchPage />} />
       <Route path='/artist/:artistId' element={<ArtistPage />} />
+      <Route path="/favorites" element={<FavoritesPage />} />
     </Routes>
   );
 }

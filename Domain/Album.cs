@@ -24,7 +24,6 @@ namespace Domain
         [Column("cover_link")]
         public string? CoverLink { get; set; }
 
-        // Навигационные свойства
         public virtual Artist Artist { get; set; } = null!;
         public virtual ICollection<AlbumTrack> AlbumTracks { get; set; } = new List<AlbumTrack>();
     }

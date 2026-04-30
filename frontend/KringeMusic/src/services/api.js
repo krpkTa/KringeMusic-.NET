@@ -304,6 +304,40 @@ async getArtistTracks(artistId, page = 1, pageSize = 100) {
   });
   if (!res.ok) throw new Error('Failed to fetch artist tracks');
   return res.json(); 
+},
+// ---------- ИЗБРАННОЕ (ЛАЙКИ) ----------
+async likeTrack(trackId) {
+  const res = await fetch(`${API_BASE_URL}/favorites/like`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ trackId })
+  });
+  if (!res.ok) throw new Error('Failed to like track');
+  return res.json();
+},
+
+async unlikeTrack(trackId) {
+  const res = await fetch(`${API_BASE_URL}/favorites/unlike`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ trackId })
+  });
+  if (!res.ok) throw new Error('Failed to unlike track');
+  return res.json();
+},
+
+async getFavorites(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({ page, pageSize });
+  const res = await fetch(`${API_BASE_URL}/favorites?${params}`, {
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to fetch favorites');
+  return res.json(); // { items, totalCount, page, pageSize }
+},
+
+// Опционально: проверить, лайкнут ли конкретный трек (если нужно)
+async isTrackLiked(trackId) {
+  // Можно реализовать отдельный эндпоинт, но для простоты – после загрузки всех избранных храним Set
 }
 };
 

@@ -22,5 +22,6 @@ namespace DataLayer
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
+        public async Task<User?> GetUserById(int id) => await _context.Users.FirstOrDefaultAsync(u=>u.UserId == id);
     }
 }

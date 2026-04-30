@@ -58,29 +58,30 @@ const SearchPage = () => {
 
   // Компонент строки трека
   const TrackRow = ({ track, index }) => (
-    <div className="track-row" onClick={() => handlePlayTrack(track)}>
-      <span className="track-number">{index + 1}</span>
-      <div className="track-info">
-        {track.coverUrl && <img src={`http://localhost:5043${track.coverUrl}`} className="track-cover" alt="cover" />}
-        <div>
-          <div className="track-title">{track.name}</div>
-          <div className="track-artist">
-            {track.artists?.map((a, idx) => (
-              <span
-                key={a.artistId}
-                onClick={(e) => { e.stopPropagation(); navigate(`/artist/${a.artistId}`); }}
-                style={{ cursor: 'pointer', textDecoration: 'underline', marginRight: '4px' }}
-              >
-                {a.name}{idx < track.artists.length - 1 ? ',' : ''}
-              </span>
-            ))}
-          </div>
+  <div className="track-row" onClick={() => playTrack(track)}>
+    <span className="track-number">{index + 1}</span>
+    <div className="track-info">
+      {track.coverUrl && <img src={`http://localhost:5043${track.coverUrl}`} className="track-cover" alt="cover" />}
+      <div>
+        <div className="track-title">{track.name}</div>
+        <div className="track-artist">
+          {track.artists?.map((a, idx) => (
+            <span
+              key={a.artistId}
+              onClick={(e) => { e.stopPropagation(); navigate(`/artist/${a.artistId}`); }}
+              style={{ cursor: 'pointer', textDecoration: 'underline', marginRight: '4px' }}
+            >
+              {a.name}{idx < track.artists.length - 1 ? ',' : ''}
+            </span>
+          ))}
         </div>
       </div>
-      <span className="track-plays">—</span>
-      <span className="track-duration">{formatDuration(track.duration)}</span>
     </div>
-  );
+    <span className="track-plays">—</span>
+    <span className="track-duration">{formatTime(track.duration)}</span>
+    <LikeButton trackId={track.trackId} size={18} className="track-like" />
+  </div>
+);
 
   return (
     <Layout currentTrack={currentTrack} playerTracks={searchResults}>

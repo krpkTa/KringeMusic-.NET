@@ -150,9 +150,13 @@ const Layout = ({ children, currentTrack, onTrackPlay, playerTracks = [] }) => {
             <li>🏋️ Спорт</li>
           </ul>
         </div>
-        <div className="liked-songs">
-          <FaHeart color="#1ed760" /> Любимые треки
-        </div>
+        <div 
+  className="liked-songs" 
+  onClick={() => navigate('/favorites')}
+  style={{ cursor: 'pointer' }}
+>
+  <FaHeart color="#1ed760" /> Любимые треки
+</div>
       </aside>
 
       {/* === TOP BAR === */}
@@ -190,22 +194,16 @@ const Layout = ({ children, currentTrack, onTrackPlay, playerTracks = [] }) => {
       {/* === PLAYER BAR === */}
       <div className="layout-player-bar">
         <div className="player-now-playing">
-          {playingTrack?.coverUrl && (
-            <img 
-              src={`http://localhost:5043${playingTrack.coverUrl}`}
-              alt="cover"
-              className="player-cover"
-            />
-          )}
-          <div className="player-track-info">
-            <div className="player-track-title">
-              {playingTrack?.name || 'No track'}
-            </div>
-            <div className="player-track-artist">
-              {playingTrack?.artists?.map(a => a.name).join(', ') || 'Unknown'}
-            </div>
-          </div>
-        </div>
+  {playingTrack?.coverUrl && (
+    <img src={`http://localhost:5043${playingTrack.coverUrl}`} alt="cover" className="player-cover" />
+  )}
+  <div className="player-track-info">
+    <div className="player-track-title">{playingTrack?.name || 'No track'}</div>
+    <div className="player-track-artist">
+      {playingTrack?.artists?.map(a => a.name).join(', ') || 'Unknown'}
+    </div>
+  </div>
+</div>
 
         <div className="player-controls">
           <button 
