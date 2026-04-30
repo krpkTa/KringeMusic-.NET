@@ -20,5 +20,6 @@ namespace Domain.Interfaces
         Task RemoveAllGenresFromArtist(int artistId, CancellationToken ct);
         Task<Artist?> GetArtistWithDetails(int id, CancellationToken ct);
         Task<int> GetTracksCountAsync(int artistId, CancellationToken ct);
+        Task<bool> ExistsById(int artistId, CancellationToken ct);
     }
 }

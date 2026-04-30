@@ -110,6 +110,12 @@ const AdminPage = () => {
     coverFile: null,
   });
 
+const toUtcDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  // Добавляем букву Z (Zulu time), чтобы обозначить UTC
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString().split('T')[0] + 'T00:00:00Z';
+};
   // Редактирование (id редактируемого объекта)
   const [editingArtist, setEditingArtist] = useState(null);
   const [editingLabel, setEditingLabel] = useState(null);
@@ -224,8 +230,7 @@ const AdminPage = () => {
     const fd = new FormData();
     fd.append('Name', trackForm.name);
     fd.append('Duration', trackForm.duration);
-    // Отправляем дату как YYYY-MM-DD (без преобразования в UTC)
-    fd.append('ReleaseDate', trackForm.releaseDate);
+    fd.append('ReleaseDate', toUtcDate(trackForm.releaseDate));
     fd.append('TrackFile', trackForm.trackFile);
     if (trackForm.coverFile) fd.append('CoverFile', trackForm.coverFile);
 
@@ -314,7 +319,7 @@ const AdminPage = () => {
     const fd = new FormData();
     fd.append('Name', editingTrackData.name);
     fd.append('Duration', editingTrackData.duration);
-    fd.append('ReleaseDate', editingTrackData.releaseDate); // уже YYYY-MM-DD
+    fd.append('ReleaseDate', toUtcDate(editingTrackData.releaseDate)); // уже YYYY-MM-DD
     if (editingTrackData.trackFile) fd.append('TrackFile', editingTrackData.trackFile);
     if (editingTrackData.coverFile) fd.append('CoverFile', editingTrackData.coverFile);
 
@@ -327,6 +332,10 @@ const AdminPage = () => {
     fd.append('genreIdsJson', JSON.stringify(genreIdsArray));
 
     try {
+      for (let pair of fd.entries()) {
+  console.log(pair[0], pair[1]);
+}
+
       await api.updateTrack(editingTrack, fd);
       alert('Трек обновлён');
       setEditingTrack(null);
@@ -352,7 +361,7 @@ const AdminPage = () => {
     fd.append('Duration', quickTrackForm.duration);
     // Используем дату из формы, если нет – дату альбома (тоже строка YYYY-MM-DD)
     const releaseDate = quickTrackForm.releaseDate || albumForm.releaseDate;
-    fd.append('ReleaseDate', releaseDate);
+    fd.append('ReleaseDate', toUtcDate(releaseDate));
     fd.append('TrackFile', quickTrackForm.trackFile);
     if (quickTrackForm.coverFile) fd.append('CoverFile', quickTrackForm.coverFile);
 
@@ -361,6 +370,9 @@ const AdminPage = () => {
     fd.append('genreIdsJson', JSON.stringify(quickTrackForm.genreIds.map(id => Number(id))));
 
     try {
+      for (let pair of fd.entries()) {
+  console.log(pair[0], pair[1]);
+}
       const newTrack = await api.createTrack(fd);
       alert('Трек успешно создан');
       await loadTracks();
@@ -405,7 +417,7 @@ const AdminPage = () => {
     const fd = new FormData();
     fd.append('ArtistId', selectedArtistId);
     fd.append('Name', albumForm.name);
-    fd.append('ReleaseDate', albumForm.releaseDate);
+    fd.append('ReleaseDate', toUtcDate(albumForm.releaseDate));
     if (albumForm.coverFile) fd.append('CoverFile', albumForm.coverFile);
     albumForm.trackIds.forEach(id => fd.append('TrackIds', id));
 
@@ -445,7 +457,7 @@ const AdminPage = () => {
     fd.append('ArtistId', selectedArtistId);
     fd.append('AlbumId', editingAlbum);
     fd.append('Name', editingAlbumData.name);
-    fd.append('ReleaseDate', editingAlbumData.releaseDate);
+    fd.append('ReleaseDate', toUtcDate(editingAlbumData.releaseDate));
     if (editingAlbumData.coverFile) fd.append('CoverFile', editingAlbumData.coverFile);
     editingAlbumData.trackIds.forEach(id => fd.append('TrackIds', id));
 

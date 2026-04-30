@@ -82,9 +82,7 @@ namespace DataLayer
                 .FirstOrDefaultAsync(a => a.ArtistId == id, ct);
         }
 
-        public async Task<int> GetTracksCountAsync(int artistId, CancellationToken ct = default)
-        {
-            return await _context.ArtistTracks.CountAsync(at => at.ArtistId == artistId, ct);
-        }
+        public async Task<int> GetTracksCountAsync(int artistId, CancellationToken ct = default) => await _context.ArtistTracks.CountAsync(at => at.ArtistId == artistId, ct);
+        public async Task<bool> ExistsById(int artistId, CancellationToken ct) => await _context.Artists.AnyAsync(a => a.ArtistId == artistId, ct);
     }
 }

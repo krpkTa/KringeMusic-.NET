@@ -261,4 +261,42 @@ async removeTracksFromAlbum(artistId, albumId, trackIds) {
   });
   if (!res.ok) throw new Error('Failed to remove tracks');
 },
+
+// ---------- ПРЕДПОЧТЕНИЯ ПОЛЬЗОВАТЕЛЯ (онбординг) ----------
+async saveUserPreferences(preferences) {
+  const res = await fetch(`${API_BASE_URL}/UserPreferences`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(preferences)
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(error || 'Failed to save preferences');
+  }
+  return res.json();
+},
+
+async getUserPreferences() {
+  const res = await fetch(`${API_BASE_URL}/UserPreferences`, {
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to fetch preferences');
+  return res.json();
+},
+
+async searchTracks(query, page = 1, pageSize = 20) {
+  const params = new URLSearchParams({ q: query, page, pageSize });
+  const res = await fetch(`${API_BASE_URL}/Search/tracks?${params}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Search failed');
+  return res.json();
+},
+
+async searchArtists(query, page = 1, pageSize = 10) {
+  const params = new URLSearchParams({ q: query, page, pageSize });
+  const res = await fetch(`${API_BASE_URL}/Search/artists?${params}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Artist search failed');
+  return res.json();
+},
+
 };
+

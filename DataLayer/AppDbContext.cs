@@ -22,6 +22,9 @@ namespace DataLayer
         public DbSet<TrackGenre> TrackGenres { get; set; }
         public DbSet<ArtistGenre> ArtistGenres { get; set; }
         public DbSet<AlbumTrack> AlbumTracks { get; set; }
+        public DbSet<UserArtist> UserArtists { get; set; }
+        public DbSet<UserGenre> UserGenres { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -166,6 +169,43 @@ namespace DataLayer
                 entity.HasOne(ag => ag.Artist)
                       .WithMany(a => a.ArtistGenres)
                       .HasForeignKey(ag => ag.ArtistId);
+            });
+
+            modelBuilder.Entity<UserGenre>(entity =>
+            {
+                entity.ToTable("user_genres");
+                entity.HasKey(ug => new { ug.GenreId, ug.UserId });
+                entity.Property(ug => ug.GenreId).HasColumnName("genre_id");
+                entity.Property(ug => ug.UserId).HasColumnName("user_id");
+
+                entity.HasOne(ug => ug.Genre)
+                      .WithMany()
+                      .HasForeignKey(ug => ug.GenreId)
+                      .OnDelete(DeleteBehavior.Restrict); // как в схеме
+
+                entity.HasOne(ug => ug.User)
+                      .WithMany(u => u.UserGenres)
+                      .HasForeignKey(ug => ug.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // UserArtist
+            modelBuilder.Entity<UserArtist>(entity =>
+            {
+                entity.ToTable("user_artist");
+                entity.HasKey(ua => new { ua.ArtistId, ua.UserId });
+                entity.Property(ua => ua.ArtistId).HasColumnName("artist_id");
+                entity.Property(ua => ua.UserId).HasColumnName("user_id");
+
+                entity.HasOne(ua => ua.Artist)
+                      .WithMany()
+                      .HasForeignKey(ua => ua.ArtistId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ua => ua.User)
+                      .WithMany(u => u.UserArtists)
+                      .HasForeignKey(ua => ua.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
         }

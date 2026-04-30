@@ -32,5 +32,8 @@ namespace KringeMusic.Models
 
         [ForeignKey("RoleId")]
         public Role? Role { get; set; }
+
+        public virtual ICollection<UserGenre> UserGenres { get; set; } = new List<UserGenre>();
+        public virtual ICollection<UserArtist> UserArtists { get; set; } = new List<UserArtist>();
     }
 }

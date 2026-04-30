@@ -41,90 +41,77 @@ const LandingPage = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5043/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login, email, password }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        let errorMsg = data.message || 'Ошибка регистрации';
-        if (data.errors) {
-          if (data.errors.login) errorMsg = data.errors.login;
-          if (data.errors.email) errorMsg = data.errors.email;
-        }
-        throw new Error(errorMsg);
-      }
-
-      setSuccess('Регистрация успешна! Теперь вы можете войти.');
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        window.location.href = '/player';
-      } else {
-        setTimeout(() => {
-          setIsLoginMode(true);
-          setLogin('');
-          setPassword('');
-          setEmail('');
-          setConfirmPassword('');
-        }, 2000);
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    const response = await fetch('http://localhost:5043/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, email, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Ошибка регистрации');
+    setSuccess('Регистрация успешна! Перенаправление...');
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      localStorage.removeItem('hasCompletedOnboarding');
+      window.location.href = '/onboarding';
+    } else {
+      setTimeout(() => {
+        setIsLoginMode(true);
+        setLogin('');
+        setPassword('');
+        setEmail('');
+        setConfirmPassword('');
+      }, 2000);
     }
-  };
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Вход (обычный и администратор)
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  e.preventDefault();
+  setError('');
+  setSuccess('');
 
-    if (!login.trim()) {
-      setError('Введите логин или email');
-      return;
-    }
-    if (!password.trim()) {
-      setError('Введите пароль');
-      return;
-    }
+  if (!login.trim()) {
+    setError('Введите логин или email');
+    return;
+  }
+  if (!password.trim()) {
+    setError('Введите пароль');
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:5043/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Identifier: login, password }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Ошибка входа');
-      }
-
-      setSuccess('Вход выполнен! Перенаправление...');
-      localStorage.setItem('token', data.token);
-
-      const token = data.token;
-      localStorage.setItem('token', token);
-
-      const decoded = jwtDecode(token);
-
-      if (decoded.role === 'ADM') {
-        window.location.href = '/admin';
-      } else {
+  setLoading(true);
+  try {
+    const response = await fetch('http://localhost:5043/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ Identifier: login, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Ошибка входа');
+    setSuccess('Вход выполнен! Перенаправление...');
+    localStorage.setItem('token', data.token);
+    const decoded = jwtDecode(data.token);
+    if (decoded.role === 'ADM') {
+      window.location.href = '/admin';
+    } else {
+      const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding');
+      if (hasCompletedOnboarding) {
         window.location.href = '/player';
+      } else {
+        window.location.href = '/onboarding';
       }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
-  };
-
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   const switchToLogin = () => {
     setIsLoginMode(true);
     setError('');
