@@ -25,7 +25,12 @@ public class ArtistsController : ControllerBase
         if (artist == null) return NotFound();
         return Ok(artist);
     }
-
+    [HttpGet("{id}/tracks")]
+    public async Task<IActionResult> GetArtistTracks(int id, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var tracks = await _artistService.GetArtistTracksAsync(id, page, pageSize, HttpContext.RequestAborted);
+        return Ok(tracks);
+    }
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] ArtistCreateDto dto)
     {

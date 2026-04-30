@@ -72,7 +72,6 @@ namespace DataLayer
             _context.ArtistGenres.RemoveRange(genres);
             await _context.SaveChangesAsync(ct);
         }
-
         public async Task<Artist?> GetArtistWithDetails(int id, CancellationToken ct)
         {
             return await _context.Artists
@@ -80,6 +79,17 @@ namespace DataLayer
                 .Include(a => a.ArtistGenres)
                     .ThenInclude(ag => ag.Genre)
                 .FirstOrDefaultAsync(a => a.ArtistId == id, ct);
+        }
+        public async Task<List<Track>> GetArtistTracks(int artistId, int page, int pageSize, CancellationToken ct)
+        {
+            return await _context.ArtistTracks
+                .Where(at => at.ArtistId == artistId)
+                .Include(at => at.Track)
+                .OrderByDescending(at => at.Track.ReleaseDate) // если у Track есть PlayCount, иначе замените на ReleaseDate
+                .Select(at => at.Track)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(ct);
         }
 
         public async Task<int> GetTracksCountAsync(int artistId, CancellationToken ct = default) => await _context.ArtistTracks.CountAsync(at => at.ArtistId == artistId, ct);

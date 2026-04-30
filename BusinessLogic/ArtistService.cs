@@ -1,6 +1,7 @@
 ﻿using Domain;
 using Domain.Interfaces;
 using KringeMusic.DTOs.Artist;
+using KringeMusic.DTOs.Track;
 using Microsoft.AspNetCore.Http;
 
 namespace Application
@@ -150,6 +151,35 @@ namespace Application
             return result;
         }
 
+        public async Task<List<TrackResponseDto>> GetArtistTracksAsync(int artistId, int page, int pageSize, CancellationToken ct)
+        {
+            var artist = await _artistRepository.GetArtistById(artistId, ct);
+            if (artist == null)
+                throw new Exception($"Artist with id {artistId} not found");
+
+            var tracks = await _artistRepository.GetArtistTracks(artistId, page, pageSize, ct);
+
+            var trackDtos = tracks.Select(track => new TrackResponseDto
+            {
+                TrackId = track.TrackId,
+                Name = track.Name,
+                Duration = track.Duration,
+                ReleaseDate = track.ReleaseDate,
+                TrackUrl = track.TrackLink,
+                CoverUrl = track.CoverLink,
+                Artists = new List<ArtistBriefDto>
+        {
+            new ArtistBriefDto
+            {
+                ArtistId = artist.ArtistId,
+                Name = artist.Name,
+            }
+        },
+                Genres = track.TrackGenres?.Select(tg => tg.Genre.Name).ToList() ?? new List<string>()
+            }).ToList();
+
+            return trackDtos;
+        }
         private async Task<ArtistResponseDto> MapToResponseAsync(Artist artist, CancellationToken ct = default)
         {
             var tracksCount = await _artistRepository.GetTracksCountAsync(artist.ArtistId, ct);

@@ -297,6 +297,13 @@ async searchArtists(query, page = 1, pageSize = 10) {
   if (!res.ok) throw new Error('Artist search failed');
   return res.json();
 },
-
+async getArtistTracks(artistId, page = 1, pageSize = 100) {
+  const params = new URLSearchParams({ page, pageSize });
+  const res = await fetch(`${API_BASE_URL}/Artists/${artistId}/tracks?${params}`, {
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to fetch artist tracks');
+  return res.json(); 
+}
 };
 

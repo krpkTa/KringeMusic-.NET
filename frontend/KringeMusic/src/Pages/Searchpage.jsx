@@ -1,9 +1,10 @@
 // src/Pages/SearchPage.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaHome, FaSearch, FaFolderOpen, FaPlus, FaHeart, FaUserCircle, FaRegClock } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import Layout from '../components/Layout';
+import { FaRegClock } from 'react-icons/fa';
 import { api } from '../services/api';
 import '../Styles/SearchPage.css';
+import { useNavigate } from 'react-router-dom';
 
 const SearchPage = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const SearchPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchArtists, setSearchArtists] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState(null);
 
   // Debounced search
   useEffect(() => {
@@ -51,9 +53,7 @@ const SearchPage = () => {
   };
 
   const handlePlayTrack = (track) => {
-    // Сохраняем трек в localStorage и перенаправляем на главную (плеер)
-    localStorage.setItem('currentTrack', JSON.stringify(track));
-    navigate('/player');
+    setCurrentTrack(track);
   };
 
   // Компонент строки трека
@@ -83,49 +83,18 @@ const SearchPage = () => {
   );
 
   return (
-    <div className="search-page">
-      <aside className="sidebar">
-        <div className="logo">KringeMusic</div>
-        <nav className="nav">
-          <a href="#" className="nav-item" onClick={() => navigate('/player')}><FaHome /> Главная</a>
-          <a href="#" className="nav-item active"><FaSearch /> Поиск</a>
-          <a href="#" className="nav-item"><FaFolderOpen /> Библиотека</a>
-        </nav>
-        <div className="playlists-section">
-          <div className="playlists-header">
-            <span>Ваши плейлисты</span>
-            <button className="create-btn"><FaPlus /></button>
-          </div>
-          <ul className="playlists-list">
-            <li>🎸 Рок классика</li>
-            <li>💃 Танцевальные хиты</li>
-            <li>🌧️ Меланхолия</li>
-            <li>🏋️ Спорт</li>
-          </ul>
+    <Layout currentTrack={currentTrack} playerTracks={searchResults}>
+      <div className="search-page-content">
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="Поиск треков и исполнителей..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input-full"
+            autoFocus
+          />
         </div>
-        <div className="liked-songs">
-          <FaHeart color="#1ed760" /> Любимые треки
-        </div>
-      </aside>
-
-      <main className="search-content">
-        <header className="top-bar">
-          <div className="greeting">Добрый вечер, Александр!</div>
-          <div className="search-container">
-            <FaSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Поиск треков и исполнителей..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-              autoFocus
-            />
-          </div>
-          <div className="user-menu">
-            <FaUserCircle size={28} />
-          </div>
-        </header>
 
         {!searchQuery && (
           <div className="search-placeholder">
@@ -176,8 +145,8 @@ const SearchPage = () => {
             )}
           </>
         )}
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
