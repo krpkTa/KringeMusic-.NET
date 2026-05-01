@@ -1,0 +1,175 @@
+.album-page {
+  padding: 20px 40px;
+  color: white;
+}
+
+.album-header {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 40px;
+  align-items: flex-end;
+}
+
+.album-cover {
+  flex-shrink: 0;
+  width: 200px;
+  height: 200px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.album-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.placeholder-cover {
+  width: 100%;
+  height: 100%;
+  background: #282828;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+}
+
+.album-info h1 {
+  font-size: 48px;
+  margin: 0 0 12px 0;
+}
+
+.album-type {
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #b3b3b3;
+}
+
+.album-meta {
+  display: flex;
+  gap: 12px;
+  color: #b3b3b3;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.artist-name {
+  cursor: pointer;
+  color: white;
+  font-weight: 500;
+}
+
+.artist-name:hover {
+  text-decoration: underline;
+}
+
+.album-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.play-all-btn {
+  background: #1ed760;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: black;
+}
+
+.play-all-btn:hover {
+  transform: scale(1.02);
+  background: #1fdf64;
+}
+
+.album-like-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.tracks-section {
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.tracks-header {
+  display: grid;
+  grid-template-columns: 50px 3fr 100px 60px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.05);
+  font-weight: 600;
+  border-bottom: 1px solid #282828;
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.tracks-list .track-row {
+  display: grid;
+  grid-template-columns: 50px 3fr 100px 60px;
+  padding: 8px 16px;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 4px;
+}
+
+.tracks-list .track-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.track-number {
+  color: #b3b3b3;
+  font-size: 16px;
+}
+
+.track-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.track-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.track-name {
+  font-weight: 500;
+}
+
+.track-duration {
+  color: #b3b3b3;
+  font-family: monospace;
+}
+
+.track-like {
+  justify-self: center;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .album-page {
+    padding: 20px;
+  }
+  .album-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .tracks-header {
+    grid-template-columns: 40px 2fr 80px 50px;
+  }
+  .tracks-list .track-row {
+    grid-template-columns: 40px 2fr 80px 50px;
+  }
+}

@@ -8,7 +8,9 @@ import ArtistPage from './Pages/ArtistPage';
 import FavoritesPage from './Pages/FavoritePage';
 import HistoryPage from './Pages/HistoryPage';
 import LibraryPage from './pages/LibraryPage';
-//import PlaylistPage from './pages/PlaylistPage';
+import PlaylistPage from './pages/PlaylistPage';
+import AlbumPage from './pages/AlbumPage';
+
 function App() {
   return (
       <Routes>
@@ -21,6 +23,8 @@ function App() {
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path='/history' element={<HistoryPage />} />
         <Route path="/library" element={<LibraryPage />} />
+        <Route path="/playlist/:typeId/:userId/:playlistId" element={<PlaylistPage />} />
+        <Route path="/artist/:artistId/album/:albumId" element={<AlbumPage />} />
       </Routes>
   );
 }
