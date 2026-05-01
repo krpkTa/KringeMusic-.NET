@@ -28,15 +28,14 @@ namespace DataLayer
         public DbSet<PlaylistType> PlaylistTypes { get; set; }
         public DbSet<PlaylistTrack> PlaylistTracks { get; set; }
         public DbSet<UserAlbum> UserAlbums { get; set; }
+        public DbSet<PlayedHistory> PlayedHistory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Конфигурация User и Role (у вас уже есть)
             ConfigureUserAndRole(modelBuilder);
 
-            // Конфигурация RecordLabel
             modelBuilder.Entity<RecordLabel>(entity =>
             {
                 entity.ToTable("record_label");
@@ -48,7 +47,6 @@ namespace DataLayer
                 
             });
 
-            // Конфигурация Artist
             modelBuilder.Entity<Artist>(entity =>
             {
                 entity.ToTable("artist");
@@ -65,7 +63,6 @@ namespace DataLayer
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Конфигурация Track
             modelBuilder.Entity<Track>(entity =>
             {
                 entity.ToTable("track");
@@ -78,7 +75,6 @@ namespace DataLayer
                 entity.Property(e => e.CoverLink).HasColumnName("cover_link");
             });
 
-            // Альбом (составной ключ)
             modelBuilder.Entity<Album>(entity =>
             {
                 entity.ToTable("album");
@@ -94,7 +90,6 @@ namespace DataLayer
                       .HasForeignKey(e => e.ArtistId);
             });
 
-            // AlbumTrack (связь альбом-трек)
             modelBuilder.Entity<AlbumTrack>(entity =>
             {
                 entity.ToTable("album_tracks");
@@ -115,7 +110,6 @@ namespace DataLayer
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Связка Artist-Track
             modelBuilder.Entity<ArtistTrack>(entity =>
             {
                 entity.ToTable("artist_tracks");
@@ -184,7 +178,7 @@ namespace DataLayer
                 entity.HasOne(ug => ug.Genre)
                       .WithMany()
                       .HasForeignKey(ug => ug.GenreId)
-                      .OnDelete(DeleteBehavior.Restrict); // как в схеме
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(ug => ug.User)
                       .WithMany(u => u.UserGenres)
@@ -192,7 +186,7 @@ namespace DataLayer
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // UserArtist
+
             modelBuilder.Entity<UserArtist>(entity =>
             {
                 entity.ToTable("user_artist");
@@ -210,8 +204,6 @@ namespace DataLayer
                       .HasForeignKey(ua => ua.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
-
-            // Внутри OnModelCreating после остальных конфигураций
 
             modelBuilder.Entity<PlaylistType>(entity =>
             {
@@ -236,7 +228,7 @@ namespace DataLayer
                       .HasForeignKey(e => e.TypeId);
 
                 entity.HasOne(e => e.User)
-                      .WithMany(u => u.Playlists) // если у User есть коллекция Playlists
+                      .WithMany(u => u.Playlists) 
                       .HasForeignKey(e => e.UserId);
             });
 
@@ -251,7 +243,7 @@ namespace DataLayer
                 entity.Property(e => e.AddedAt).HasColumnName("added_at");
 
                 entity.HasOne(e => e.Track)
-                      .WithMany(t => t.PlaylistTracks) // добавьте в Track коллекцию
+                      .WithMany(t => t.PlaylistTracks) 
                       .HasForeignKey(e => e.TrackId);
 
                 entity.HasOne(e => e.Playlist)
@@ -271,12 +263,37 @@ namespace DataLayer
                 entity.HasOne(e => e.Album)
                       .WithMany()
                       .HasForeignKey(e => new { e.ArtistId, e.AlbumId })
-                      .OnDelete(DeleteBehavior.Cascade); // согласно схеме: ON DELETE CASCADE
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Restrict); 
+            });
+
+            modelBuilder.Entity<PlayedHistory>(entity =>
+            {
+                entity.ToTable("played_history");
+                entity.HasKey(e => e.HistoryId);
+                entity.Property(e => e.HistoryId)
+                      .HasColumnName("history_id")
+                      .UseIdentityColumn();   
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.TrackId).HasColumnName("track_id");
+                entity.Property(e => e.Source).HasColumnName("source");
+                entity.Property(e => e.DurationPlayed).HasColumnName("duration_played");
+                entity.Property(e => e.IsSkipped).HasColumnName("is_skipped");
+                entity.Property(e => e.ListeningDate).HasColumnName("listening_date");
 
                 entity.HasOne(e => e.User)
                       .WithMany()
                       .HasForeignKey(e => e.UserId)
-                      .OnDelete(DeleteBehavior.Restrict); // в схеме: ON DELETE RESTRICT
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Track)
+                      .WithMany()
+                      .HasForeignKey(e => e.TrackId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
         }

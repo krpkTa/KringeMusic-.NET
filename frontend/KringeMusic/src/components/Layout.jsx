@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import {
   FaHome, FaSearch, FaFolderOpen, FaPlus, FaHeart,
   FaPlay, FaPause, FaStepBackward, FaStepForward,
-  FaVolumeUp, FaUserCircle
-} from 'react-icons/fa';
+  FaVolumeUp, FaUserCircle, FaHistory}
+from 'react-icons/fa';
 import '../Styles/Layout.css';
+import { api } from '../services/api';
 
 const Layout = ({ children, currentTrack, onTrackPlay, playerTracks = [] }) => {
   const navigate = useNavigate();
@@ -48,10 +49,23 @@ const Layout = ({ children, currentTrack, onTrackPlay, playerTracks = [] }) => {
     if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
   };
 
-  const handleEnded = () => {
-    setIsPlaying(false);
-    setCurrentTime(0);
-  };
+  const handleEnded = async () => {
+  if (playingTrack) {
+    const fullDuration = Math.floor(duration);
+    try {
+      await api.recordPlayHistory(
+        playingTrack.trackId,
+        'player_natural_end',
+        fullDuration,
+        false  
+      );
+    } catch (err) {
+      console.error('Не удалось записать окончание трека', err);
+    }
+  }
+  setIsPlaying(false);
+  setCurrentTime(0);
+};
 
   const handlePlayPause = () => {
     if (!audioRef.current || !playingTrack) return;
@@ -79,26 +93,51 @@ const Layout = ({ children, currentTrack, onTrackPlay, playerTracks = [] }) => {
     }
   };
 
-  const handleNext = () => {
-    if (!playerTracks.length) return;
-    const currentIdx = playerTracks.findIndex(t => t.trackId === playingTrack?.trackId);
-    const nextIdx = (currentIdx + 1) % playerTracks.length;
-    setPlayingTrack(playerTracks[nextIdx]);
-    if (onTrackPlay) onTrackPlay(playerTracks[nextIdx]);
-  };
+const handleNext = async () => {
+  if (!playerTracks.length) return;
+  // Записать пропуск текущего трека
+  await recordCurrentAsSkipped();
 
-  const handlePrev = () => {
-    if (!playerTracks.length) return;
-    if (currentTime > 3) {
-      if (audioRef.current) audioRef.current.currentTime = 0;
-      setCurrentTime(0);
-      return;
-    }
-    const currentIdx = playerTracks.findIndex(t => t.trackId === playingTrack?.trackId);
-    const prevIdx = (currentIdx - 1 + playerTracks.length) % playerTracks.length;
-    setPlayingTrack(playerTracks[prevIdx]);
-    if (onTrackPlay) onTrackPlay(playerTracks[prevIdx]);
-  };
+  const currentIdx = playerTracks.findIndex(t => t.trackId === playingTrack?.trackId);
+  const nextIdx = (currentIdx + 1) % playerTracks.length;
+  const newTrack = playerTracks[nextIdx];
+  setPlayingTrack(newTrack);
+  if (onTrackPlay) onTrackPlay(newTrack);
+  // Для нового трека запись будет сделана при его старте (через handlePlayTrack в других местах)
+};
+
+const recordCurrentAsSkipped = async () => {
+  if (!playingTrack) return;
+  const playedTime = Math.floor(currentTime); // сколько секунд успел прослушать
+  try {
+    await api.recordPlayHistory(
+      playingTrack.trackId,
+      'player_skip',
+      playedTime,
+      true   // is_skipped = true
+    );
+  } catch (err) {
+    console.error('Не удалось записать пропуск трека', err);
+  }
+};
+
+  const handlePrev = async () => {
+  if (!playerTracks.length) return;
+  // Если прошло более 3 секунд – перемотать, а не переключать трек
+  if (currentTime > 3) {
+    if (audioRef.current) audioRef.current.currentTime = 0;
+    setCurrentTime(0);
+    return;
+  }
+  // Записать пропуск текущего трека
+  await recordCurrentAsSkipped();
+
+  const currentIdx = playerTracks.findIndex(t => t.trackId === playingTrack?.trackId);
+  const prevIdx = (currentIdx - 1 + playerTracks.length) % playerTracks.length;
+  const newTrack = playerTracks[prevIdx];
+  setPlayingTrack(newTrack);
+  if (onTrackPlay) onTrackPlay(newTrack);
+};
 
   const formatTime = (seconds) => {
     if (isNaN(seconds)) return '0:00';
@@ -144,11 +183,14 @@ const Layout = ({ children, currentTrack, onTrackPlay, playerTracks = [] }) => {
             <button className="create-btn"><FaPlus /></button>
           </div>
           <ul className="playlists-list">
-            <li>🎸 Рок классика</li>
-            <li>💃 Танцевальные хиты</li>
-            <li>🌧️ Меланхолия</li>
-            <li>🏋️ Спорт</li>
+            <li>🎸 Плейлист 1</li>
+            <li>💃 Плейлист 2</li>
+            <li>🌧️ Плейлист 3</li>
+            <li>🏋️ Плейлист 4</li>
           </ul>
+          <div className="liked-songs" onClick={() => navigate('/history')} style={{ cursor: 'pointer', marginTop: '20px' }}>
+  <FaHistory /> История прослушиваний
+</div>
         </div>
         <div 
   className="liked-songs" 

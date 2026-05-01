@@ -52,13 +52,17 @@ const SearchPage = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handlePlayTrack = (track) => {
-    setCurrentTrack(track);
-  };
+  const handlePlayTrack = async (track) => {
+  setCurrentTrack(track);
+  try {
+    await api.recordPlayHistory(track.trackId, 'search_page', 1, false);
+  } catch (err) {
+    console.error('Не удалось записать историю', err);
+  }
+};
 
-  // Компонент строки трека
   const TrackRow = ({ track, index }) => (
-  <div className="track-row" onClick={() => playTrack(track)}>
+  <div className="track-row" onClick={() => handlePlayTrack(track)}>
     <span className="track-number">{index + 1}</span>
     <div className="track-info">
       {track.coverUrl && <img src={`http://localhost:5043${track.coverUrl}`} className="track-cover" alt="cover" />}

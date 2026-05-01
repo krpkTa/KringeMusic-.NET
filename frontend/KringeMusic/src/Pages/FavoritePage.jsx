@@ -31,9 +31,14 @@ const FavoritesPage = () => {
     fetchFavorites(page);
   }, [page]);
 
-  const playTrack = (track) => {
-    setCurrentTrack(track);
-  };
+  const playTrack = async (track) => {
+  setCurrentTrack(track);
+  try {
+    await api.recordPlayHistory(track.trackId, 'favorites_page', 1, false);
+  } catch (err) {
+    console.error('Не удалось записать историю', err);
+  }
+};
 
   const formatDuration = (seconds) => {
     if (!seconds) return '0:00';

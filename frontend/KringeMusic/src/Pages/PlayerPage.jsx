@@ -33,10 +33,15 @@ const PlayerPage = () => {
     fetchTracks();
   }, []);
 
-  const playTrack = useCallback((track) => {
-    if (!track) return;
-    setCurrentTrack(track);
-  }, []);
+  const playTrack = useCallback(async (track) => {
+  if (!track) return;
+  setCurrentTrack(track);
+  try {
+    await api.recordPlayHistory(track.trackId, 'player_page', 1, false);
+  } catch (err) {
+    console.error('Не удалось записать историю', err);
+  }
+}, []);
 
   const formatTime = (seconds) => {
     if (isNaN(seconds) || seconds === undefined) return '0:00';

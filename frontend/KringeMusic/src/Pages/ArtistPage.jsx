@@ -56,15 +56,26 @@ const ArtistPage = () => {
     .sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
     .slice(0, 3);
 
-  const handlePlayTrack = (track) => {
-    setCurrentTrack(track);
-  };
+  const handlePlayTrack = async (track) => {
+  setCurrentTrack(track);
+  try {
+    await api.recordPlayHistory(track.trackId, 'artist_page', 1, false);
+  } catch (err) {
+    console.error('Не удалось записать историю прослушивания', err);
+  }
+};
 
-  const handlePlayAll = () => {
-    if (tracks.length > 0) {
-      setCurrentTrack(tracks[0]);
+  const handlePlayAll = async () => {
+  if (tracks.length > 0) {
+    const firstTrack = tracks[0];
+    setCurrentTrack(firstTrack);
+    try {
+      await api.recordPlayHistory(firstTrack.trackId, 'artist_page_play_all', 1, false);
+    } catch (err) {
+      console.error('Не удалось записать историю', err);
     }
-  };
+  }
+};
 
   const getImageUrl = (url) => {
     if (!url) return null;

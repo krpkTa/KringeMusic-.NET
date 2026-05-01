@@ -366,7 +366,22 @@ async getFavoriteAlbums(page = 1, pageSize = 20) {
     headers: getHeaders()
   });
   if (!res.ok) throw new Error('Failed to fetch favorite albums');
-  return res.json(); // { items, totalCount, page, pageSize }
+  return res.json();
 },
+async recordPlayHistory(trackId, source = 'manual', durationPlayed = 1, isSkipped = false) {
+  const res = await fetch(`${API_BASE_URL}/history`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ trackId, source, durationPlayed, isSkipped })
+  });
+  if (!res.ok) throw new Error('Failed to record history');
+  return res.json();
+},
+async getUserHistory(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({ page, pageSize });
+  const res = await fetch(`${API_BASE_URL}/history?${params}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch history');
+  return res.json();
+}
 };
 
