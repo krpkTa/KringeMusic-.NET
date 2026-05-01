@@ -443,5 +443,18 @@ async removeTrackFromPlaylist(typeId, userId, playlistId, trackId) {
   });
   if (!res.ok) throw new Error('Failed to remove track');
 },
+async getDailyPlaylist() {
+  const res = await fetch(`${API_BASE_URL}/DailyPlaylist`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch daily playlist');
+  return res.json();
+},
+async regenerateDailyPlaylist() {
+  const res = await fetch(`${API_BASE_URL}/DailyPlaylist/regenerate`, {
+    method: 'POST',
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to regenerate daily playlist');
+  return res.json();
+}
 };
 

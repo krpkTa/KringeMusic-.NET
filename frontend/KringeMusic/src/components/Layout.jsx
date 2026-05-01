@@ -18,7 +18,8 @@ const Layout = ({ children, currentTrack, onTrackPlay, playerTracks = [] }) => {
   const [volume, setVolume] = useState(1);
   const [playingTrack, setPlayingTrack] = useState(currentTrack);
   const audioRef = useRef(null);
-
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
   // === Sync with parent ===
   useEffect(() => {
     if (currentTrack && currentTrack.trackId !== playingTrack?.trackId) {
@@ -154,7 +155,18 @@ const recordCurrentAsSkipped = async () => {
   setPlayingTrack(newTrack);
   if (onTrackPlay) onTrackPlay(newTrack);
 };
-
+const handleCreatePlaylist = async () => {
+  if (!newPlaylistName.trim()) return;
+  try {
+    await api.createPlaylist(newPlaylistName);
+    setNewPlaylistName('');
+    setShowCreateModal(false);
+    // После создания можно остаться на текущей странице или перейти в библиотеку
+    // Можно вызвать navigate('/library'), но лучше просто закрыть модалку
+  } catch (err) {
+    console.error('Failed to create playlist', err);
+  }
+};
   const formatTime = (seconds) => {
     if (isNaN(seconds)) return '0:00';
     const mins = Math.floor(seconds / 60);
@@ -198,16 +210,7 @@ const recordCurrentAsSkipped = async () => {
 </a>
         </nav>
         <div className="sidebar-playlists">
-          <div className="playlists-header">
-            <span>Ваши плейлисты</span>
-            <button className="create-btn"><FaPlus /></button>
-          </div>
-          <ul className="playlists-list">
-            <li>🎸 Плейлист 1</li>
-            <li>💃 Плейлист 2</li>
-            <li>🌧️ Плейлист 3</li>
-            <li>🏋️ Плейлист 4</li>
-          </ul>
+          
           <div className="liked-songs" onClick={() => navigate('/history')} style={{ cursor: 'pointer', marginTop: '20px' }}>
   <FaHistory /> История прослушиваний
 </div>

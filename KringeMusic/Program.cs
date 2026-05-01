@@ -50,6 +50,7 @@ builder.Services.AddScoped<ISearchRepository, SearchRepository>();
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IPlayHistoryRepository, PlayHistoryRepository>();
 builder.Services.AddScoped<HistoryService>();
+builder.Services.AddScoped<DailyPlaylistService>();
 builder.Services.AddScoped<PlaylistService>();
 builder.Services.AddScoped<FavoritesService>();
 builder.Services.AddScoped<SearchService>();

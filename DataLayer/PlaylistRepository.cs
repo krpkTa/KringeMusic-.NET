@@ -161,6 +161,33 @@ namespace DataLayer
             return await _context.PlaylistTracks
                 .CountAsync(pt => pt.TypeId == typeId && pt.UserId == userId && pt.PlaylistId == playlistId, ct);
         }
+
+        public async Task<HashSet<int>> GetFavoriteTrackIds(int userId, CancellationToken ct)
+        {
+            var ids = await _context.PlaylistTracks
+                .Where(pt => pt.TypeId == 1 && pt.UserId == userId)
+                .Select(pt => pt.TrackId)
+                .ToListAsync(ct);
+            return ids.ToHashSet();
+        }
+
+        public async Task ClearPlaylistTracks(int typeId, int userId, int playlistId, CancellationToken ct)
+        {
+            var toDelete = _context.PlaylistTracks
+                .Where(pt => pt.TypeId == typeId && pt.UserId == userId && pt.PlaylistId == playlistId);
+            _context.PlaylistTracks.RemoveRange(toDelete);
+            await _context.SaveChangesAsync(ct);
+        }
+
+        public async Task UpdatePlaylistCreatedAt(int typeId, int userId, int playlistId, DateTime newDate, CancellationToken ct)
+        {
+            var playlist = await GetPlaylistById(typeId, userId, playlistId, ct);
+            if (playlist != null)
+            {
+                playlist.CreatedAt = newDate;
+                await _context.SaveChangesAsync(ct);
+            }
+        }
     }
 }
 

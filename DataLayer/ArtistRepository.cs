@@ -27,6 +27,13 @@ namespace DataLayer
             _context.Artists.Add(artist);
             await _context.SaveChangesAsync(ct);
         }
+        public async Task<List<int>> GetUserArtistIds(int userId, CancellationToken ct = default)
+        {
+            return await _context.UserArtists
+                .Where(ua => ua.UserId == userId)
+                .Select(ua => ua.ArtistId)
+                .ToListAsync(ct);
+        }
 
         public async Task<Artist?> GetArtistByIdWithLabel(int id, CancellationToken ct) => await _context.Artists.Include(a => a.Label).FirstOrDefaultAsync(a => a.ArtistId == id, ct);
         public async Task<List<Artist>> GetArtistsPaginated(string? search, int page, int pageSize, CancellationToken ct)

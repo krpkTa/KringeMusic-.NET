@@ -22,5 +22,6 @@ namespace Domain.Interfaces
         Task<int> GetTracksCountAsync(int artistId, CancellationToken ct);
         Task<List<Track>> GetArtistTracks(int artistId, int page, int pageSize, CancellationToken ct);
         Task<bool> ExistsById(int artistId, CancellationToken ct);
+        Task<List<int>> GetUserArtistIds(int userId, CancellationToken ct);
     }
 }

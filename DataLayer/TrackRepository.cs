@@ -98,7 +98,70 @@ namespace DataLayer
             _context.TrackGenres.RemoveRange(genres);
             await _context.SaveChangesAsync(ct);
         }
+        public async Task<List<Track>> GetRecommendedTracks(List<int> genreIds, List<int> artistIds, int limit, CancellationToken ct = default)
+        {
+            // Если нет ни жанров, ни артистов – вернуть пустой список (или глобальный топ)
+            if ((genreIds == null || !genreIds.Any()) && (artistIds == null || !artistIds.Any()))
+                return new List<Track>();
 
+            var query = _context.Tracks.AsQueryable();
+
+            // Добавляем фильтрацию по жанрам через связанную таблицу track_genres
+            if (genreIds != null && genreIds.Any())
+            {
+                query = query.Where(t => t.TrackGenres.Any(tg => genreIds.Contains(tg.GenreId)));
+            }
+
+            // Добавляем фильтрацию по артистам через artist_tracks
+            if (artistIds != null && artistIds.Any())
+            {
+                // Нужно использовать OR для жанров и артистов, поэтому объединяем два набора через Union
+                // Проще выполнить два отдельных запроса и объединить, но можно и Union в EF.
+            }
+
+            // Проще: получить треки, удовлетворяющие хотя бы одному условию – используем Union
+            var byGenre = genreIds?.Any() == true
+                ? _context.Tracks.Where(t => t.TrackGenres.Any(tg => genreIds.Contains(tg.GenreId)))
+                : Enumerable.Empty<Track>().AsQueryable();
+
+            var byArtist = artistIds?.Any() == true
+                ? _context.Tracks.Where(t => t.ArtistTracks.Any(at => artistIds.Contains(at.ArtistId)))
+                : Enumerable.Empty<Track>().AsQueryable();
+
+            var combined = byGenre.Union(byArtist).Distinct();
+
+            return await combined
+                .OrderByDescending(t => t.Duration) // временно, позже заменим на popularity
+                .Take(limit)
+                .Include(t => t.ArtistTracks)
+                    .ThenInclude(at => at.Artist)
+                .AsNoTracking()
+                .ToListAsync(ct);
+        }
+
+        public async Task<List<Track>> GetTopTracks(int limit, CancellationToken ct = default)
+        {
+            // Считаем количество прослушиваний каждого трека из истории и сортируем по убыванию
+            var topTrackIds = await _context.PlayedHistory
+                .GroupBy(h => h.TrackId)
+                .Select(g => new { TrackId = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(limit)
+                .Select(x => x.TrackId)
+                .ToListAsync(ct);
+
+            var tracks = await _context.Tracks
+                .Where(t => topTrackIds.Contains(t.TrackId))
+                .Include(t => t.ArtistTracks)
+                    .ThenInclude(at => at.Artist)
+                .AsNoTracking()
+                .ToListAsync(ct);
+
+            // Сохраняем порядок из topTrackIds
+            return topTrackIds.Select(id => tracks.FirstOrDefault(t => t.TrackId == id))
+                              .Where(t => t != null)
+                              .ToList()!;
+        }
         public async Task<bool> ExistsArtist(int artistId, CancellationToken ct)
             => await _context.Artists.AnyAsync(a => a.ArtistId == artistId, ct);
 

@@ -42,5 +42,15 @@ namespace DataLayer
 
             return (items, totalCount);
         }
+        public async Task<HashSet<int>> GetRecentlyPlayedTrackIds(int userId, TimeSpan period, CancellationToken ct = default)
+        {
+            var cutoff = DateTime.UtcNow - period;
+            var ids = await _context.PlayedHistory
+                .Where(h => h.UserId == userId && h.ListeningDate >= cutoff)
+                .Select(h => h.TrackId)
+                .Distinct()
+                .ToListAsync(ct);
+            return ids.ToHashSet();
+        }
     }
 }

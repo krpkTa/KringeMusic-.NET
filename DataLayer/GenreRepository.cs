@@ -56,7 +56,13 @@ namespace DataLayer
                 await _context.SaveChangesAsync(ct);
             }
         }
-
+        public async Task<List<int>> GetUserGenreIds(int userId, CancellationToken ct = default)
+        {
+            return await _context.UserGenres
+                .Where(ug => ug.UserId == userId)
+                .Select(ug => ug.GenreId)
+                .ToListAsync(ct);
+        }
         public async Task<bool> ExistsById(int id, CancellationToken ct)
             => await _context.Genres.AnyAsync(g => g.GenreId == id, ct);
     }

@@ -21,5 +21,8 @@ namespace Domain.Interfaces
         Task DeletePlaylist(int typeId, int userId, int playlistId, CancellationToken ct = default);
         Task<List<Track>> GetPlaylistTracks(int typeId, int userId, int playlistId, int page, int pageSize, CancellationToken ct = default);
         Task<int> GetPlaylistTracksCount(int typeId, int userId, int playlistId, CancellationToken ct = default);
+        Task<HashSet<int>> GetFavoriteTrackIds(int userId, CancellationToken ct = default);
+        Task ClearPlaylistTracks(int typeId, int userId, int playlistId, CancellationToken ct = default);
+        Task UpdatePlaylistCreatedAt(int typeId, int userId, int playlistId, DateTime newDate, CancellationToken ct = default);
     }
 }

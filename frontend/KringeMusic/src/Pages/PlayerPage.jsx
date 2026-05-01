@@ -5,25 +5,25 @@ import { FaRegClock } from 'react-icons/fa';
 import { api } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import LikeButton from '../components/LikeButton';
+import { useAuth } from '../context/AuthContext';
 
 const PlayerPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // ждём авторизацию
   const [tracks, setTracks] = useState([]);
   const [currentTrack, setCurrentTrack] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dailyPlaylist, setDailyPlaylist] = useState(null);
+  const [loadingDaily, setLoadingDaily] = useState(true);
 
-  // Загрузка треков
+  // Загрузка популярных треков
   useEffect(() => {
     const fetchTracks = async () => {
       try {
         setLoading(true);
         const response = await api.getTracks('', 1, 20);
-        // Поддержка разных форматов ответа: массив или { items, totalCount }
         const tracksList = Array.isArray(response) ? response : response.items || [];
         setTracks(tracksList);
-        if (tracksList.length > 0 && !currentTrack) {
-          setCurrentTrack(tracksList[0]);
-        }
       } catch (err) {
         console.error('Ошибка загрузки треков', err);
       } finally {
@@ -33,15 +33,32 @@ const PlayerPage = () => {
     fetchTracks();
   }, []);
 
+  // Загрузка плейлиста дня (только когда пользователь авторизован)
+  useEffect(() => {
+    if (!user) return;
+    const fetchDaily = async () => {
+      setLoadingDaily(true);
+      try {
+        const playlist = await api.getDailyPlaylist();
+        setDailyPlaylist(playlist);
+      } catch (err) {
+        console.error('Failed to load daily playlist', err);
+      } finally {
+        setLoadingDaily(false);
+      }
+    };
+    fetchDaily();
+  }, [user]);
+
   const playTrack = useCallback(async (track) => {
-  if (!track) return;
-  setCurrentTrack(track);
-  try {
-    await api.recordPlayHistory(track.trackId, 'player_page', 1, false);
-  } catch (err) {
-    console.error('Не удалось записать историю', err);
-  }
-}, []);
+    if (!track) return;
+    setCurrentTrack(track);
+    try {
+      await api.recordPlayHistory(track.trackId, 'player_page', 1, false);
+    } catch (err) {
+      console.error('Не удалось записать историю', err);
+    }
+  }, []);
 
   const formatTime = (seconds) => {
     if (isNaN(seconds) || seconds === undefined) return '0:00';
@@ -50,14 +67,12 @@ const PlayerPage = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Безопасное получение URL обложки
   const getCoverUrl = (coverUrl) => {
     if (!coverUrl) return null;
     if (coverUrl.startsWith('http')) return coverUrl;
     return `http://localhost:5043${coverUrl}`;
   };
 
-  // Компонент строки трека
   const TrackRow = ({ track, index }) => {
     const artistsList = track.artists && Array.isArray(track.artists) ? track.artists : [];
     const coverUrl = getCoverUrl(track.coverUrl);
@@ -106,10 +121,29 @@ const PlayerPage = () => {
       <section className="featured">
         <h2>Привет, слушатель!</h2>
         <div className="recs-grid">
-          <div className="rec-card">🎧 Плейлист дня</div>
-          <div className="rec-card">📈 Топ-50 Россия</div>
-          <div className="rec-card">✨ Новинки недели</div>
-          <div className="rec-card">🎤 Подкасты</div>
+          {loadingDaily ? (
+            <div className="rec-card loading-daily">Загрузка подборки...</div>
+          ) : dailyPlaylist ? (
+            <div 
+              className="rec-card daily-card" 
+              onClick={() => navigate(`/playlist/${dailyPlaylist.typeId}/${dailyPlaylist.userId}/${dailyPlaylist.playlistId}`)}
+            >
+              <div className="daily-card-content">
+                {dailyPlaylist.coverUrl ? (
+                  <img src={getCoverUrl(dailyPlaylist.coverUrl)} alt={dailyPlaylist.name} className="daily-cover" />
+                ) : (
+                  <div className="daily-cover-placeholder">🎧</div>
+                )}
+                <div className="daily-info">
+                  <h3>{dailyPlaylist.name}</h3>
+                  <p>{dailyPlaylist.trackCount} треков • подборка на сегодня</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rec-card">🎧 Плейлист дня</div>
+          )}
+          
         </div>
       </section>
 

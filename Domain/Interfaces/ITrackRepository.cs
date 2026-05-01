@@ -24,5 +24,7 @@ namespace Domain.Interfaces
         Task<bool> ExistsArtist(int artistId, CancellationToken ct);
         Task<bool> ExistsGenre(int genreId, CancellationToken ct);
         Task<bool> ExistsAsync(int genreId, CancellationToken ct);
+        Task<List<Track>> GetRecommendedTracks(List<int> genreIds, List<int> artistIds, int limit, CancellationToken ct);
+        Task<List<Track>> GetTopTracks(int limit, CancellationToken ct);
     }
 }

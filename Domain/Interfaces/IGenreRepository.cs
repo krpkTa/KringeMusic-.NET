@@ -16,5 +16,6 @@ namespace Domain.Interfaces
         Task Update(Genre genre, CancellationToken ct);
         Task Delete(int id, CancellationToken ct);
         Task<bool> ExistsById(int id, CancellationToken ct);
+        Task<List<int>> GetUserGenreIds(int userId, CancellationToken ct);
     }
 }
