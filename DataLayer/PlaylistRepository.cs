@@ -92,6 +92,75 @@ namespace DataLayer
             return await _context.PlaylistTracks
                 .CountAsync(pt => pt.TypeId == SystemPlaylistTypeId && pt.UserId == userId, ct);
         }
+
+        public async Task<List<Playlist>> GetUserPlaylists(int userId, CancellationToken ct = default)
+        {
+            return await _context.Playlists
+                .Where(p => p.UserId == userId)
+                .OrderBy(p => p.TypeId) 
+                .ThenBy(p => p.CreatedAt)
+                .Include(p => p.Type)
+                .ToListAsync(ct);
+        }
+
+        public async Task<Playlist?> GetPlaylistById(int typeId, int userId, int playlistId, CancellationToken ct = default)
+        {
+            return await _context.Playlists
+                .FirstOrDefaultAsync(p => p.TypeId == typeId && p.UserId == userId && p.PlaylistId == playlistId, ct);
+        }
+
+        public async Task<Playlist> CreatePlaylist(int userId, string name, int typeId, CancellationToken ct = default)
+        {
+            var maxId = await _context.Playlists
+                .Where(p => p.UserId == userId && p.TypeId == typeId)
+                .MaxAsync(p => (int?)p.PlaylistId, ct) ?? 0;
+
+            var playlist = new Playlist
+            {
+                TypeId = typeId,
+                UserId = userId,
+                PlaylistId = maxId + 1,
+                Name = name,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Playlists.Add(playlist);
+            await _context.SaveChangesAsync(ct);
+            return playlist;
+        }
+
+        public async Task DeletePlaylist(int typeId, int userId, int playlistId, CancellationToken ct = default)
+        {
+            var playlist = await GetPlaylistById(typeId, userId, playlistId, ct);
+            if (playlist != null)
+            {
+                var tracks = _context.PlaylistTracks.Where(pt =>
+                    pt.TypeId == typeId && pt.UserId == userId && pt.PlaylistId == playlistId);
+                _context.PlaylistTracks.RemoveRange(tracks);
+                _context.Playlists.Remove(playlist);
+                await _context.SaveChangesAsync(ct);
+            }
+        }
+
+        public async Task<List<Track>> GetPlaylistTracks(int typeId, int userId, int playlistId, int page, int pageSize, CancellationToken ct = default)
+        {
+            return await _context.PlaylistTracks
+                .Where(pt => pt.TypeId == typeId && pt.UserId == userId && pt.PlaylistId == playlistId)
+                .OrderByDescending(pt => pt.AddedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(pt => pt.Track)               
+                    .ThenInclude(t => t.ArtistTracks)
+                        .ThenInclude(at => at.Artist)
+                .Select(pt => pt.Track!)            
+                .AsNoTracking()
+                .ToListAsync(ct);
+        }
+
+        public async Task<int> GetPlaylistTracksCount(int typeId, int userId, int playlistId, CancellationToken ct = default)
+        {
+            return await _context.PlaylistTracks
+                .CountAsync(pt => pt.TypeId == typeId && pt.UserId == userId && pt.PlaylistId == playlistId, ct);
+        }
     }
 }
 

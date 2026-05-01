@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import { useAuth } from './AuthContext';
 
@@ -12,7 +12,7 @@ export const FavoritesProvider = ({ children }) => {
   const [likedAlbumKeys, setLikedAlbumKeys] = useState(new Set()); // Set of "artistId_albumId"
   const [loading, setLoading] = useState(false);
 
-  const loadFavorites = async () => {
+  const loadFavorites = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
@@ -30,11 +30,11 @@ export const FavoritesProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadFavorites();
-  }, [user]);
+  }, [loadFavorites]);
 
   // ----- Треки -----
   const likeTrack = async (trackId) => {

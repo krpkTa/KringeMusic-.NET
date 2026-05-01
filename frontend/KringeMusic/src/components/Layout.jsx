@@ -50,17 +50,25 @@ const Layout = ({ children, currentTrack, onTrackPlay, playerTracks = [] }) => {
   };
 
   const handleEnded = async () => {
+  console.log('[handleEnded] Трек закончился', { playingTrack, duration: Math.floor(duration) });
   if (playingTrack) {
     const fullDuration = Math.floor(duration);
     try {
-      await api.recordPlayHistory(
+      console.log('[recordPlayHistory] Отправляю запрос:', { 
+        trackId: playingTrack.trackId, 
+        source: 'player_natural_end', 
+        durationPlayed: fullDuration, 
+        isSkipped: false 
+      });
+      const result = await api.recordPlayHistory(
         playingTrack.trackId,
         'player_natural_end',
         fullDuration,
         false  
       );
+      console.log('[recordPlayHistory] Успешно записано:', result);
     } catch (err) {
-      console.error('Не удалось записать окончание трека', err);
+      console.error('[recordPlayHistory] Ошибка:', err);
     }
   }
   setIsPlaying(false);
@@ -107,17 +115,25 @@ const handleNext = async () => {
 };
 
 const recordCurrentAsSkipped = async () => {
+  console.log('[recordCurrentAsSkipped] Пропуск трека', { playingTrack, currentTime });
   if (!playingTrack) return;
   const playedTime = Math.floor(currentTime); // сколько секунд успел прослушать
   try {
-    await api.recordPlayHistory(
+    console.log('[recordCurrentAsSkipped] Отправляю запрос:', {
+      trackId: playingTrack.trackId,
+      source: 'player_skip',
+      durationPlayed: playedTime,
+      isSkipped: true
+    });
+    const result = await api.recordPlayHistory(
       playingTrack.trackId,
       'player_skip',
       playedTime,
       true   // is_skipped = true
     );
+    console.log('[recordCurrentAsSkipped] Успешно записано:', result);
   } catch (err) {
-    console.error('Не удалось записать пропуск трека', err);
+    console.error('[recordCurrentAsSkipped] Ошибка:', err);
   }
 };
 
@@ -173,9 +189,13 @@ const recordCurrentAsSkipped = async () => {
           >
             <FaSearch /> Поиск
           </a>
-          <a href="#" className="nav-item">
-            <FaFolderOpen /> Библиотека
-          </a>
+          <a 
+  href="#" 
+  className="nav-item" 
+  onClick={(e) => { e.preventDefault(); navigate('/library'); }}
+>
+  <FaFolderOpen /> Библиотека
+</a>
         </nav>
         <div className="sidebar-playlists">
           <div className="playlists-header">

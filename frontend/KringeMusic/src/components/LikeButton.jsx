@@ -3,13 +3,13 @@ import { useFavorites } from '../context/FavoritesContext';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
 const LikeButton = ({ trackId, size = 20, className = '' }) => {
-  const { likedTrackIds, toggleLike, loading } = useFavorites();
+  const { likedTrackIds, toggleLikeTrack, loading } = useFavorites();
   const isLiked = likedTrackIds.has(trackId);
 
   const handleClick = async (e) => {
     e.stopPropagation(); // предотвращаем запуск проигрывания трека
     try {
-      await toggleLike(trackId);
+      await toggleLikeTrack(trackId);
     } catch (err) {
       // здесь можно показать уведомление
     }

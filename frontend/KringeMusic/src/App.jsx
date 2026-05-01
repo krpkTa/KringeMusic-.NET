@@ -7,20 +7,23 @@ import SearchPage from './Pages/Searchpage';
 import ArtistPage from './Pages/ArtistPage';
 import FavoritesPage from './Pages/FavoritePage';
 import HistoryPage from './Pages/HistoryPage';
-
+import LibraryPage from './pages/LibraryPage';
+//import PlaylistPage from './pages/PlaylistPage';
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/onboarding" element={<OnBoardingPage />} /> 
-      <Route path="/admin" element={<AdminPage />} />
-      <Route path='/player' element={<PlayerPage/>} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path='/artist/:artistId' element={<ArtistPage />} />
-      <Route path="/favorites" element={<FavoritesPage />} />
-      <Route path='/history' element={<HistoryPage />} />
-    </Routes>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/onboarding" element={<OnBoardingPage />} /> 
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path='/player' element={<PlayerPage/>} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path='/artist/:artistId' element={<ArtistPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path='/history' element={<HistoryPage />} />
+        <Route path="/library" element={<LibraryPage />} />
+      </Routes>
   );
 }
+
 
 export default App;

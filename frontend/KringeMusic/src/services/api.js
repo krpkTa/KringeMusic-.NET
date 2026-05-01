@@ -365,16 +365,25 @@ async getFavoriteAlbums(page = 1, pageSize = 20) {
   const res = await fetch(`${API_BASE_URL}/favorites/albums?${params}`, {
     headers: getHeaders()
   });
+  console.log('[API.getFavoriteAlbums] Response status:', res.status);
   if (!res.ok) throw new Error('Failed to fetch favorite albums');
-  return res.json();
+  const data = await res.json();
+  console.log('[API.getFavoriteAlbums] Response data:', data);
+  return data;
 },
 async recordPlayHistory(trackId, source = 'manual', durationPlayed = 1, isSkipped = false) {
+  console.log('[API.recordPlayHistory] Отправляю на /history:', { trackId, source, durationPlayed, isSkipped });
   const res = await fetch(`${API_BASE_URL}/history`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify({ trackId, source, durationPlayed, isSkipped })
   });
-  if (!res.ok) throw new Error('Failed to record history');
+  console.log('[API.recordPlayHistory] Ответ сервера:', res.status, res.statusText);
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('[API.recordPlayHistory] Ошибка:', errorText);
+    throw new Error('Failed to record history');
+  }
   return res.json();
 },
 async getUserHistory(page = 1, pageSize = 20) {
@@ -382,6 +391,57 @@ async getUserHistory(page = 1, pageSize = 20) {
   const res = await fetch(`${API_BASE_URL}/history?${params}`, { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch history');
   return res.json();
-}
+},
+// ---------- ПЛЕЙЛИСТЫ ----------
+async getUserPlaylists() {
+  const res = await fetch(`${API_BASE_URL}/playlists`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch playlists');
+  return res.json();
+},
+
+async createPlaylist(name) {
+  const res = await fetch(`${API_BASE_URL}/playlists`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ name })
+  });
+  if (!res.ok) throw new Error('Failed to create playlist');
+  return res.json();
+},
+
+async deletePlaylist(typeId, userId, playlistId) {
+  const res = await fetch(`${API_BASE_URL}/playlists/${typeId}/${userId}/${playlistId}`, {
+    method: 'DELETE',
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to delete playlist');
+},
+
+async getPlaylistTracks(typeId, userId, playlistId, page = 1, pageSize = 20) {
+  const params = new URLSearchParams({ page, pageSize });
+  const res = await fetch(`${API_BASE_URL}/playlists/${typeId}/${userId}/${playlistId}/tracks?${params}`, {
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to fetch playlist tracks');
+  return res.json();
+},
+
+async addTrackToPlaylist(typeId, userId, playlistId, trackId) {
+  const res = await fetch(`${API_BASE_URL}/playlists/${typeId}/${userId}/${playlistId}/tracks`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ trackId })
+  });
+  if (!res.ok) throw new Error('Failed to add track');
+},
+
+async removeTrackFromPlaylist(typeId, userId, playlistId, trackId) {
+  const res = await fetch(`${API_BASE_URL}/playlists/${typeId}/${userId}/${playlistId}/tracks`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+    body: JSON.stringify({ trackId })
+  });
+  if (!res.ok) throw new Error('Failed to remove track');
+},
 };
 
