@@ -26,7 +26,8 @@ namespace DataLayer
         public DbSet<UserGenre> UserGenres { get; set; }
         public DbSet<Playlist> Playlists { get; set; }
         public DbSet<PlaylistType> PlaylistTypes { get; set; }
-        public DbSet<PlaylistTrack> PlaylistTracks { get; set; } // добавлено
+        public DbSet<PlaylistTrack> PlaylistTracks { get; set; }
+        public DbSet<UserAlbum> UserAlbums { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -256,6 +257,26 @@ namespace DataLayer
                 entity.HasOne(e => e.Playlist)
                       .WithMany(p => p.PlaylistTracks)
                       .HasForeignKey(e => new { e.TypeId, e.UserId, e.PlaylistId });
+            });
+
+            modelBuilder.Entity<UserAlbum>(entity =>
+            {
+                entity.ToTable("user_albums");
+                entity.HasKey(e => new { e.ArtistId, e.AlbumId, e.UserId });
+
+                entity.Property(e => e.ArtistId).HasColumnName("artist_id");
+                entity.Property(e => e.AlbumId).HasColumnName("album_id");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.HasOne(e => e.Album)
+                      .WithMany()
+                      .HasForeignKey(e => new { e.ArtistId, e.AlbumId })
+                      .OnDelete(DeleteBehavior.Cascade); // согласно схеме: ON DELETE CASCADE
+
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Restrict); // в схеме: ON DELETE RESTRICT
             });
 
         }

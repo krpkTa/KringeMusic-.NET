@@ -3,7 +3,7 @@ using KringeMusic.DTOs.Artist;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-//[Authorize(Roles = "ADM")]
+
 [ApiController]
 [Route("api/[controller]")]
 public class ArtistsController : ControllerBase
@@ -31,13 +31,14 @@ public class ArtistsController : ControllerBase
         var tracks = await _artistService.GetArtistTracksAsync(id, page, pageSize, HttpContext.RequestAborted);
         return Ok(tracks);
     }
+    [Authorize(Roles = "ADM")]
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] ArtistCreateDto dto)
     {
         var result = await _artistService.CreateAsync(dto.Name, dto.Description, dto.LabelId, dto.GenreIds);
         return Ok(result);
     }
-
+    [Authorize(Roles = "ADM")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromForm] ArtistUpdateDto dto)
     {
@@ -47,7 +48,7 @@ public class ArtistsController : ControllerBase
 
         return Ok(result);
     }
-
+    [Authorize(Roles = "ADM")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

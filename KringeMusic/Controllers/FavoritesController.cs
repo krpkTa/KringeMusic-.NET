@@ -1,4 +1,5 @@
 ﻿using Application;
+using Application.DTOs.Album;
 using Application.DTOs.Track;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,30 @@ namespace KringeMusic.Controllers
         {
             var userId = GetCurrentUserId();
             var (items, totalCount) = await _favoritesService.GetFavoriteTracks(userId, page, pageSize, HttpContext.RequestAborted);
+            return Ok(new { items, totalCount, page, pageSize });
+        }
+
+        [HttpPost("likeAlbum")]
+        public async Task<IActionResult> LikeAlbum([FromBody] AlbumFavoriteActionDto dto)
+        {
+            var userId = GetCurrentUserId();
+            await _favoritesService.AddAlbumToFavorites(userId, dto.ArtistId, dto.AlbumId, HttpContext.RequestAborted);
+            return Ok(new { message = "Альбом добавлен в избранное" });
+        }
+
+        [HttpPost("unlikeAlbum")]
+        public async Task<IActionResult> UnlikeAlbum([FromBody] AlbumFavoriteActionDto dto)
+        {
+            var userId = GetCurrentUserId();
+            await _favoritesService.RemoveAlbumFromFavorites(userId, dto.ArtistId, dto.AlbumId, HttpContext.RequestAborted);
+            return Ok(new { message = "Альбом удалён из избранного" });
+        }
+
+        [HttpGet("albums")]
+        public async Task<IActionResult> GetFavoriteAlbums([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = GetCurrentUserId();
+            var (items, totalCount) = await _favoritesService.GetFavoriteAlbums(userId, page, pageSize, HttpContext.RequestAborted);
             return Ok(new { items, totalCount, page, pageSize });
         }
     }

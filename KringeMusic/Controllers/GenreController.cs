@@ -1,10 +1,11 @@
 ﻿using Application;
 using Application.DTOs.Genre;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KringeMusic.Controllers
 {
-    //[Authorize(Roles = "ADM")]
+    
     [ApiController]
     [Route("api/[controller]")]
     public class GenreController : ControllerBase
@@ -26,7 +27,7 @@ namespace KringeMusic.Controllers
             if (genre == null) return NotFound();
             return Ok(genre);
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] GenreCreateDto dto)
         {
@@ -40,7 +41,7 @@ namespace KringeMusic.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] GenreUpdateDto dto)
         {
@@ -56,6 +57,7 @@ namespace KringeMusic.Controllers
             }
         }
 
+        [Authorize(Roles = "ADM")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

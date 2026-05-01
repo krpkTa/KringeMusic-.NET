@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { api } from '../services/api';
 import '../Styles/ArtistPage.css';
+import LikeButton from '../components/LikeButton';
+import AlbumLikeButton from '../components/AlbumLikeButton';
 
 const ArtistPage = () => {
   const { artistId } = useParams();
@@ -202,31 +204,26 @@ const ArtistPage = () => {
 
               <div className="albums-grid">
                 {albums.map((album) => (
-                  <div
-                    key={album.albumId}
-                    className="album-card"
-                  >
-                    <div className="album-cover-wrapper">
-                      {album.coverUrl ? (
-                        <img
-                          src={getImageUrl(album.coverUrl)}
-                          alt={album.name}
-                          className="album-cover"
-                        />
-                      ) : (
-                        <div className="album-cover placeholder"></div>
-                      )}
-                    </div>
-
-                    <h4 className="album-title">{album.name}</h4>
-
-                    <p className="album-year">
-                      {album.releaseDate
-                        ? new Date(album.releaseDate).getFullYear()
-                        : '—'}
-                    </p>
-                  </div>
-                ))}
+  <div key={album.albumId} className="album-card">
+    <div className="album-cover-wrapper">
+      {album.coverUrl ? (
+        <img src={getImageUrl(album.coverUrl)} alt={album.name} className="album-cover" />
+      ) : (
+        <div className="album-cover placeholder"></div>
+      )}
+    </div>
+    <h4 className="album-title">{album.name}</h4>
+    <p className="album-year">
+      {album.releaseDate ? new Date(album.releaseDate).getFullYear() : '—'}
+    </p>
+    <AlbumLikeButton
+      artistId={album.artistId}
+      albumId={album.albumId}
+      size={18}
+      className="album-like"
+    />
+  </div>
+))}
               </div>
             </section>
           )}

@@ -78,8 +78,7 @@ const SearchPage = () => {
       </div>
     </div>
     <span className="track-plays">—</span>
-    <span className="track-duration">{formatTime(track.duration)}</span>
-    <LikeButton trackId={track.trackId} size={18} className="track-like" />
+    <span className="track-duration">{formatDuration(track.duration)}</span>
   </div>
 );
 

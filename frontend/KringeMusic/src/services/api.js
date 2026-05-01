@@ -338,6 +338,35 @@ async getFavorites(page = 1, pageSize = 20) {
 // Опционально: проверить, лайкнут ли конкретный трек (если нужно)
 async isTrackLiked(trackId) {
   // Можно реализовать отдельный эндпоинт, но для простоты – после загрузки всех избранных храним Set
-}
+},
+// ---------- ИЗБРАННОЕ (ЛАЙКИ) АЛЬБОМОВ ----------
+async likeAlbum(artistId, albumId) {
+  const res = await fetch(`${API_BASE_URL}/favorites/likeAlbum`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ artistId, albumId })
+  });
+  if (!res.ok) throw new Error('Failed to like album');
+  return res.json();
+},
+
+async unlikeAlbum(artistId, albumId) {
+  const res = await fetch(`${API_BASE_URL}/favorites/unlikeAlbum`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ artistId, albumId })
+  });
+  if (!res.ok) throw new Error('Failed to unlike album');
+  return res.json();
+},
+
+async getFavoriteAlbums(page = 1, pageSize = 20) {
+  const params = new URLSearchParams({ page, pageSize });
+  const res = await fetch(`${API_BASE_URL}/favorites/albums?${params}`, {
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error('Failed to fetch favorite albums');
+  return res.json(); // { items, totalCount, page, pageSize }
+},
 };
 

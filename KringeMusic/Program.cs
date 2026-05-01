@@ -69,7 +69,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5174")  // URL твоего фронта (Vite по умолчанию 5173-5174)
+            policy.WithOrigins("http://localhost:5173")  // URL твоего фронта (Vite по умолчанию 5173-5174)
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();  // если используешь куки или авторизацию через токен в заголовке

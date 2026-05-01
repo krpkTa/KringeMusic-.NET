@@ -1,12 +1,13 @@
 ﻿using Application;
 using Application.DTOs.Track;
 using KringeMusic.DTOs.Track;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 namespace KringeMusic.Controllers
 {
-    //[Authorize(Roles = "ADM")]
+    
     [ApiController]
     [Route("api/[controller]")]
     public class TrackController : ControllerBase
@@ -32,7 +33,7 @@ namespace KringeMusic.Controllers
 
             return Ok(tracks);
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] TrackCreateDto dto)
         {
@@ -67,7 +68,7 @@ namespace KringeMusic.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] TrackUpdateDto dto)
         {
@@ -100,7 +101,7 @@ namespace KringeMusic.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

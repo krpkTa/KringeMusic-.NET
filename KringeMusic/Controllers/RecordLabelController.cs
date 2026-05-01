@@ -1,11 +1,11 @@
 ﻿using Application;
 using Application.DTOs.RecordLabel;
 using KringeMusic.DTOs.RecordLabel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KringeMusic.Controllers
 {
-    //[Authorize(Role = "ADM"]
     [ApiController]
     [Route("api/[controller]")]
     public class RecordLabelController : ControllerBase
@@ -29,7 +29,7 @@ namespace KringeMusic.Controllers
 
             return Ok(label);
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] LabelCreateDto dto)
         {
@@ -41,7 +41,7 @@ namespace KringeMusic.Controllers
 
             return Ok(result);
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] LabelUpdateDto dto)
         {
@@ -58,7 +58,7 @@ namespace KringeMusic.Controllers
 
             return Ok(result);
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

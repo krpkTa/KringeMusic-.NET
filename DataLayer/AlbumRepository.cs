@@ -116,5 +116,54 @@ namespace DataLayer
             return await _context.AlbumTracks
                 .CountAsync(at => at.ArtistId == artistId && at.AlbumId == albumId, ct);
         }
+
+        public async Task AddToFavoritesAsync(int userId, int artistId, int albumId, CancellationToken ct = default)
+        {
+            var userAlbum = new UserAlbum
+            {
+                UserId = userId,
+                ArtistId = artistId,
+                AlbumId = albumId
+            };
+            await _context.UserAlbums.AddAsync(userAlbum, ct);
+            await _context.SaveChangesAsync(ct);
+        }
+
+        public async Task RemoveFromFavoritesAsync(int userId, int artistId, int albumId, CancellationToken ct = default)
+        {
+            var entry = await _context.UserAlbums
+                .FirstOrDefaultAsync(ua => ua.UserId == userId && ua.ArtistId == artistId && ua.AlbumId == albumId, ct);
+            if (entry != null)
+            {
+                _context.UserAlbums.Remove(entry);
+                await _context.SaveChangesAsync(ct);
+            }
+        }
+
+        public async Task<bool> IsAlbumInFavoritesAsync(int userId, int artistId, int albumId, CancellationToken ct = default)
+        {
+            return await _context.UserAlbums
+                .AnyAsync(ua => ua.UserId == userId && ua.ArtistId == artistId && ua.AlbumId == albumId, ct);
+        }
+
+        public async Task<(List<Album> Albums, int TotalCount)> GetFavoriteAlbumsAsync(int userId, int page, int pageSize, CancellationToken ct = default)
+        {
+            var query = _context.UserAlbums
+                .Where(ua => ua.UserId == userId)
+                .Join(_context.Albums,
+                    ua => new { ua.ArtistId, ua.AlbumId },
+                    a => new { a.ArtistId, a.AlbumId },
+                    (ua, a) => a)
+                .Include(a => a.Artist);
+
+            var totalCount = await query.CountAsync(ct);
+            var albums = await query
+                .OrderByDescending(a => a.ReleaseDate)  // сортировка на усмотрение
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(ct);
+
+            return (albums, totalCount);
+        }
     }
 }

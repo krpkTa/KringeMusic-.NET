@@ -1,5 +1,6 @@
 ﻿using Application;
 using Application.DTOs.Album;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KringeMusic.Controllers
@@ -32,7 +33,7 @@ namespace KringeMusic.Controllers
             if (album == null) return NotFound();
             return Ok(album);
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPost]
         public async Task<IActionResult> Create(int artistId, [FromForm] AlbumCreateDto dto)
         {
@@ -42,7 +43,7 @@ namespace KringeMusic.Controllers
             var result = await _albumService.CreateAsync(dto, HttpContext.RequestAborted);
             return CreatedAtAction(nameof(GetById), new { artistId = result.ArtistId, albumId = result.AlbumId }, result);
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPut("{albumId}")]
         public async Task<IActionResult> Update(int artistId, int albumId, [FromForm] AlbumUpdateDto dto)
         {
@@ -52,21 +53,21 @@ namespace KringeMusic.Controllers
             var result = await _albumService.UpdateAsync(dto, HttpContext.RequestAborted);
             return Ok(result);
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpDelete("{albumId}")]
         public async Task<IActionResult> Delete(int artistId, int albumId)
         {
             await _albumService.DeleteAsync(artistId, albumId, HttpContext.RequestAborted);
             return NoContent();
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpPost("{albumId}/tracks")]
         public async Task<IActionResult> AddTracks(int artistId, int albumId, [FromBody] AddTrackToAlbumDto dto)
         {
             await _albumService.AddTracksToAlbumAsync(artistId, albumId, dto, HttpContext.RequestAborted);
             return NoContent();
         }
-
+        [Authorize(Roles = "ADM")]
         [HttpDelete("{albumId}/tracks")]
         public async Task<IActionResult> RemoveTracks(int artistId, int albumId, [FromBody] AddTrackToAlbumDto dto)
         {

@@ -1,25 +1,30 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { useAuth } from './AuthContext'; // если у вас есть контекст авторизации
+import { useAuth } from './AuthContext';
 
 const FavoritesContext = createContext();
 
 export const useFavorites = () => useContext(FavoritesContext);
 
 export const FavoritesProvider = ({ children }) => {
-  const { user } = useAuth(); // получаем текущего пользователя (или используйте localStorage)
+  const { user } = useAuth();
   const [likedTrackIds, setLikedTrackIds] = useState(new Set());
+  const [likedAlbumKeys, setLikedAlbumKeys] = useState(new Set()); // Set of "artistId_albumId"
   const [loading, setLoading] = useState(false);
 
-  // Загружаем ID всех избранных треков при авторизации
   const loadFavorites = async () => {
     if (!user) return;
     setLoading(true);
     try {
-      // Для простоты возьмём первые 1000 треков (или сделайте цикл по страницам)
-      const res = await api.getFavorites(1, 1000);
-      const ids = res.items.map(t => t.trackId);
-      setLikedTrackIds(new Set(ids));
+      // Загрузка избранных треков
+      const tracksRes = await api.getFavorites(1, 1000);
+      const trackIds = tracksRes.items.map(t => t.trackId);
+      setLikedTrackIds(new Set(trackIds));
+
+      // Загрузка избранных альбомов
+      const albumsRes = await api.getFavoriteAlbums(1, 1000);
+      const albumKeys = albumsRes.items.map(a => `${a.artistId}_${a.albumId}`);
+      setLikedAlbumKeys(new Set(albumKeys));
     } catch (err) {
       console.error('Failed to load favorites', err);
     } finally {
@@ -31,13 +36,14 @@ export const FavoritesProvider = ({ children }) => {
     loadFavorites();
   }, [user]);
 
+  // ----- Треки -----
   const likeTrack = async (trackId) => {
     if (likedTrackIds.has(trackId)) return;
     try {
       await api.likeTrack(trackId);
       setLikedTrackIds(prev => new Set([...prev, trackId]));
     } catch (err) {
-      console.error('Like error', err);
+      console.error('Like track error', err);
       throw err;
     }
   };
@@ -52,16 +58,54 @@ export const FavoritesProvider = ({ children }) => {
         return newSet;
       });
     } catch (err) {
-      console.error('Unlike error', err);
+      console.error('Unlike track error', err);
       throw err;
     }
   };
 
-  const toggleLike = (trackId) => {
+  const toggleLikeTrack = (trackId) => {
     if (likedTrackIds.has(trackId)) {
       return unlikeTrack(trackId);
     } else {
       return likeTrack(trackId);
+    }
+  };
+
+  // ----- Альбомы -----
+  const likeAlbum = async (artistId, albumId) => {
+    const key = `${artistId}_${albumId}`;
+    if (likedAlbumKeys.has(key)) return;
+    try {
+      await api.likeAlbum(artistId, albumId);
+      setLikedAlbumKeys(prev => new Set([...prev, key]));
+    } catch (err) {
+      console.error('Like album error', err);
+      throw err;
+    }
+  };
+
+  const unlikeAlbum = async (artistId, albumId) => {
+    const key = `${artistId}_${albumId}`;
+    if (!likedAlbumKeys.has(key)) return;
+    try {
+      await api.unlikeAlbum(artistId, albumId);
+      setLikedAlbumKeys(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(key);
+        return newSet;
+      });
+    } catch (err) {
+      console.error('Unlike album error', err);
+      throw err;
+    }
+  };
+
+  const toggleLikeAlbum = (artistId, albumId) => {
+    const key = `${artistId}_${albumId}`;
+    if (likedAlbumKeys.has(key)) {
+      return unlikeAlbum(artistId, albumId);
+    } else {
+      return likeAlbum(artistId, albumId);
     }
   };
 
@@ -70,7 +114,11 @@ export const FavoritesProvider = ({ children }) => {
       likedTrackIds,
       likeTrack,
       unlikeTrack,
-      toggleLike,
+      toggleLikeTrack,
+      likedAlbumKeys,
+      likeAlbum,
+      unlikeAlbum,
+      toggleLikeAlbum,
       loadFavorites,
       loading
     }}>

@@ -19,5 +19,9 @@ namespace Domain.Interfaces
         Task RemoveTracksFromAlbumAsync(int artistId, int albumId, List<int> trackIds, CancellationToken ct = default);
         Task<bool> IsTrackInAlbumAsync(int artistId, int albumId, int trackId, CancellationToken ct = default);
         Task<int> GetTracksCountAsync(int artistId, int albumId, CancellationToken ct = default);
+        Task AddToFavoritesAsync(int userId, int artistId, int albumId, CancellationToken ct = default);
+        Task RemoveFromFavoritesAsync(int userId, int artistId, int albumId, CancellationToken ct = default);
+        Task<bool> IsAlbumInFavoritesAsync(int userId, int artistId, int albumId, CancellationToken ct = default);
+        Task<(List<Album> Albums, int TotalCount)> GetFavoriteAlbumsAsync(int userId, int page, int pageSize, CancellationToken ct = default);
     }
 }
